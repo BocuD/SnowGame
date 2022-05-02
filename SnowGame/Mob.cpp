@@ -9,16 +9,11 @@ void Mob::init()
 	addTexture("Assets/Sprites/Slimes/slimegreen.png", 30);
 	setTextureId(0);
 	animate = true;
+
+	colliderSize = { 20, 15 };
 }
 
 void Mob::update()
 {
 	RigidBody::update();
-}
-
-sf::FloatRect Mob::getColliderRect()
-{
-	sf::Vector2f position = getPosition();
-	sf::FloatRect rect(position.x - 10, position.y - 15, 20, 15);
-	return rect;
 }

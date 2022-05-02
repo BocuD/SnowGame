@@ -3,7 +3,6 @@
 
 void Player::init()
 {
-	name = "Player";
 	textureSize = { 512, 512 }; 
 	setOrigin(255, 400);
 	setScale(0.15f, 0.15f);
@@ -12,10 +11,11 @@ void Player::init()
 	addTexture("Assets/Sprites/BlueWizard/jump.png", 8);
 	addTexture("Assets/Sprites/BlueWizard/dash.png", 16);
 	setTextureId(0);
+
+	colliderSize = { 20, 40 };
 	animate = true;
 }
 
-bool isGrounded = true;
 bool upWasPressed = false;
 bool shiftWasPressed = false;
 sf::Vector2f velocity;
@@ -46,7 +46,7 @@ void Player::update()
 
 	if (disableStateMachine == 0)
 	{
-		if (moving && isGrounded)
+		if (moving && grounded)
 		{
 			if (textureId != 1)
 			{
@@ -65,11 +65,13 @@ void Player::update()
 	}
 	else disableStateMachine--;
 
+	if (grounded) jumpCount = 3;
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
 		if (!upWasPressed && jumpCount > 0) {
 			velocity.y = -300;
 			upWasPressed = true;
-			isGrounded = false;
+			grounded = false;
 			jumpCount--;
 
 			delayFrames = 4;
@@ -84,7 +86,7 @@ void Player::update()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
 	{
-		if (!shiftWasPressed && isGrounded) 
+		if (!shiftWasPressed && grounded) 
 		{
 			shiftWasPressed = true;
 			velocity.x *= 4;
@@ -113,15 +115,13 @@ void Player::update()
 	//	jumpCount = 3;
 	//}
 
-	isGrounded = true;
-	jumpCount = 3;
-
 	RigidBody::update();
 }
 
-sf::FloatRect Player::getColliderRect()
+void Player::onCollisionEnter(RigidBody* other)
 {
-	sf::Vector2f position = getPosition();
-	sf::FloatRect rect(position.x - 10, position.y - 40, 20, 40);
-	return rect;
+	if(other->name == "Mob")
+	{
+		std::cout << "touched a mob, bad" << std::endl;
+	}
 }

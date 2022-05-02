@@ -7,8 +7,15 @@
 class RigidBody : public AnimatedGameObject
 {
 public:
-	void handleCollisions(std::vector<sf::FloatRect> colliders);
-	virtual sf::FloatRect getColliderRect();
+	void handleCollisions(std::vector<sf::FloatRect> colliders, std::vector<RigidBody*> rigidBodies);
+	void updateColliderRect();
+
+	sf::Vector2f colliderSize;
+	sf::FloatRect colliderRect;
+	std::vector<RigidBody*> intersectingBodies;
 
 	bool grounded = true;
+
+	virtual void onCollisionEnter(RigidBody* other) {};
+	virtual void onCollisionExit(RigidBody* other) {};
 };

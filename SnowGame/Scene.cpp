@@ -43,21 +43,22 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 			for (const auto& entity : layer.allEntities())
 			{
 				std::cout << "Creating entity " << entity.getName() << std::endl;
+
 				if (entity.getName() == "Player")
 				{
 					auto p = std::make_unique<Player>();
-					p->setPosition(sf::Vector2f(entity.getPosition().x, entity.getPosition().y));
 					p->init();
+					p->setPosition(sf::Vector2f(entity.getPosition().x, entity.getPosition().y));
+					p->name = "Player";
 
 					entities.push_back(std::move(p));
-
 					player = entities.back().get();
+
 					rigidBodies.push_back((RigidBody*)player);
 				}
 				else if (entity.getName() == "Mob")
 				{
 					auto m = std::make_unique<Mob>();
-
 					m->init();
 					m->setPosition(sf::Vector2f(entity.getPosition().x, entity.getPosition().y));
 					m->name = entity.getName();
@@ -126,7 +127,7 @@ void Scene::update()
 
 	//run collision detection
 	for (auto rb : rigidBodies)
-		rb->handleCollisions(colliders);
+		rb->handleCollisions(colliders, rigidBodies);
 }
 
 void Scene::draw(sf::RenderWindow* window)
@@ -142,8 +143,11 @@ void Scene::draw(sf::RenderWindow* window)
 		window->draw(*entity);
 
 	//draw rigidbody boxes
-	for (auto rb : rigidBodies)
-		window->draw(getColliderShape(rb->getColliderRect(), sf::Color::Red));
+	for (auto rb : rigidBodies) 
+	{
+		rb->updateColliderRect();
+		window->draw(getColliderShape(rb->colliderRect, sf::Color::Red));
+	}
 
 	//draw collider boxes
 	for (auto& rect : colliders)

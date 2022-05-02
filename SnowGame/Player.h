@@ -9,5 +9,5 @@ public:
 	void init() override;
 	void update() override;
 
-	sf::FloatRect getColliderRect() override;
+	void onCollisionEnter(RigidBody* other) override;
 };
