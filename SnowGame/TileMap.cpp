@@ -20,6 +20,9 @@ bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vecto
 			// get the current tile number
 			const int tileNumber = tile.tileId;
 
+#pragma warning(push)
+#pragma warning(disable : 4244)
+
 			// find its position in the tileset texture
 			const float tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
 			const float tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
@@ -38,6 +41,8 @@ bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vecto
 			quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
 			quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
 			quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+
+#pragma warning(pop)
 
 			if (tile.flipX)
 			{

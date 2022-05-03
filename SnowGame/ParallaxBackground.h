@@ -3,20 +3,16 @@
 #include <vector>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-
-class ParallaxLayer
-{
-public:
-	ParallaxLayer(std::string texturePath, float depth);
-
-	sf::Sprite sprite;
-	float speed;
-};
+#include <SFML/Graphics/Texture.hpp>
 
 class ParallaxBackground : public sf::Drawable
 {
 public:
-	std::vector<ParallaxLayer> layers;
+	std::vector<sf::Sprite> sprites;
+	std::vector<sf::Texture> textures;
+
+	void addLayer(std::string texturePath);
+	void update(sf::Vector2f camPos);
 
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

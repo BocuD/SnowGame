@@ -4,34 +4,63 @@
 #include <vector>
 #include <SFML/Graphics/Rect.hpp>
 
-void RigidBody::handleCollisions(std::vector<sf::FloatRect> colliders, std::vector<RigidBody*> rigidBodies)
+#include "Collider.h"
+
+void RigidBody::handleCollisions(std::vector<Collider> colliders, std::vector<RigidBody*> rigidBodies)
 {
 	// do collision checks
 	updateColliderRect();
-	auto rbCollider = colliderRect;
 
-	for (auto& rect : colliders) {
+	for (Collider& col : colliders)
+	{
 		sf::FloatRect intersect;
-		if (rbCollider.intersects(rect, intersect)) {
-			if (intersect.width < intersect.height)
+
+		if (col.isTrigger) //handle trigger events
+		{
+			const bool wasInTrigger = std::find(intersectingTriggers.begin(), intersectingTriggers.end(), &col) != intersectingTriggers.end();
+
+			if (colliderRect.intersects(col.bounds, intersect))
 			{
-				if (rbCollider.left < intersect.left)
-					move(-intersect.width, 0);
-				else
-					move(intersect.width, 0);
+				if (!wasInTrigger)
+				{
+					intersectingTriggers.push_back(&col);
+					onTriggerEnter(&col);
+				}
 			}
 			else
 			{
-				//touching the floor, we need to move up: we're grounded
-				if (rbCollider.top < intersect.top)
+				if (wasInTrigger)
 				{
-					move(0, -intersect.height);
-					grounded = true;
+					intersectingTriggers.erase(std::remove(intersectingTriggers.begin(), intersectingTriggers.end(), &col), intersectingTriggers.end());
+					onTriggerExit(&col);
 				}
-				//touching the ceiling, we need to move downwards
+			}
+		}
+		else //resolve collisions
+		{
+			if (colliderRect.intersects(col.bounds, intersect))
+			{
+				if (intersect.width < intersect.height)
+				{
+					//handle wall collisions
+					if (colliderRect.left < intersect.left)
+						move(-intersect.width, 0);
+					else
+						move(intersect.width, 0);
+				}
 				else
 				{
-					move(0, intersect.height);
+					//touching the floor, we need to move up: we're grounded
+					if (colliderRect.top < intersect.top)
+					{
+						move(0, -intersect.height);
+						grounded = true;
+					}
+					//touching the ceiling, we need to move downwards
+					else
+					{
+						move(0, intersect.height);
+					}
 				}
 			}
 		}
@@ -42,11 +71,11 @@ void RigidBody::handleCollisions(std::vector<sf::FloatRect> colliders, std::vect
 		if (rb == this) continue;
 
 		sf::FloatRect intersect;
-		bool colliding = std::find(intersectingBodies.begin(), intersectingBodies.end(), rb) != intersectingBodies.end();
+		const bool wasColliding = std::find(intersectingBodies.begin(), intersectingBodies.end(), rb) != intersectingBodies.end();
 
-		if(rbCollider.intersects(rb->colliderRect, intersect))
+		if(colliderRect.intersects(rb->colliderRect, intersect))
 		{
-			if (!colliding) 
+			if (!wasColliding) 
 			{
 				intersectingBodies.push_back(rb);
 				onCollisionEnter(rb);
@@ -54,7 +83,7 @@ void RigidBody::handleCollisions(std::vector<sf::FloatRect> colliders, std::vect
 		}
 		else
 		{
-			if (colliding) 
+			if (wasColliding) 
 			{
 				intersectingBodies.erase(std::remove(intersectingBodies.begin(), intersectingBodies.end(), rb), intersectingBodies.end());
 				onCollisionExit(rb);

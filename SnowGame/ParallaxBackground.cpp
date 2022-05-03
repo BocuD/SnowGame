@@ -3,25 +3,33 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-ParallaxLayer::ParallaxLayer(std::string texturePath, float depth)
+void ParallaxBackground::addLayer(std::string texturePath)
 {
-	/*sf::Texture texture;
-	texture.loadFromFile(texturePath);
+	textures.emplace_back();
+	sf::Texture* texture = &textures.back();
+	texture->loadFromFile(texturePath);
+	texture->setRepeated(true);
 
-	sprite.setTexture(texture);
-	sprite.setOrigin(texture.getSize().x/2, texture.getSize().y/2);
-	speed = 0;*/
+	sprites.emplace_back();
+	sf::Sprite* sprite = &sprites.back();
+	sprite->setTexture(*texture);
+	sprite->setScale(5, 5);
+	sf::IntRect rect = sprite->getTextureRect();
+	sprite->setTextureRect({ 0, 0, 2048, rect.height });
+}
 
-	sf::Texture t;
-	t.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
-	sprite.setTexture(t);
-	sprite.setScale(5, 5);
+void ParallaxBackground::update(const sf::Vector2f camPos)
+{
+	for(size_t i = 0; i < sprites.size(); i++)
+	{
+		sprites[i].setPosition(camPos * (float)i);
+	}
 }
 
 void ParallaxBackground::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	for (auto layer : layers)
+	for (sf::Sprite layer: sprites)
 	{
-		target.draw(layer.sprite);
+		target.draw(layer);
 	}
 }

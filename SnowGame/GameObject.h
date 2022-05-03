@@ -12,10 +12,3 @@ public:
 	virtual void init() {};
 	virtual void update() {};
 };
-
-enum EntityType
-{
-	tile,
-	player,
-	other,
-};

@@ -14,6 +14,9 @@ public:
 	void removeHealth(int amount);
 	void onCollisionEnter(RigidBody* other) override;
 
-	float health;
+	void onTriggerEnter(Collider* other) override;
+	void onTriggerExit(Collider* other) override;
+
+	float health = maxHealth;
 	const float maxHealth = 25;
 };

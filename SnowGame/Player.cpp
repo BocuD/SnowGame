@@ -15,10 +15,8 @@ void Player::init()
 	addTexture("Assets/Sprites/BlueWizard/dash.png", 16);
 	setTextureId(0);
 
-	colliderSize = { 20, 40 };
+	colliderSize = { 20, 35 };
 	animate = true;
-
-	health = maxHealth;
 }
 
 bool upWasPressed = false;
@@ -28,6 +26,7 @@ int disableStateMachine = 0;
 int jumpCount = 3;
 int invincibilityFrames = 0;
 int frameMod;
+int onLadder = 0;
 
 void Player::runStateMachine(bool moving)
 {
@@ -95,7 +94,13 @@ void Player::update()
 	if (grounded) jumpCount = 3;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-		if (!upWasPressed && jumpCount > 0) {
+		if(onLadder > 0)
+		{
+			velocity.y = -100;
+		}
+		//only jump if we're not on a ladder
+		else if (!upWasPressed && jumpCount > 0) 
+		{
 			velocity.y = -300;
 			upWasPressed = true;
 			grounded = false;
@@ -165,5 +170,21 @@ void Player::onCollisionEnter(RigidBody* other)
 		invincibilityFrames = 50;
 		setColor(sf::Color::Red);
 		removeHealth(3);
+	}
+}
+
+void Player::onTriggerEnter(Collider* other)
+{
+	if(other->tag == "Ladder")
+	{
+		onLadder++;
+	}
+}
+
+void Player::onTriggerExit(Collider* other)
+{
+	if(other->tag == "Ladder")
+	{
+		onLadder--;
 	}
 }

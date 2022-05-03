@@ -12,43 +12,49 @@ namespace sf
 	class RectangleShape;
 }
 
-ParallaxBackground bg;
-
 sf::RectangleShape getColliderShape(const sf::FloatRect& rect, sf::Color c);
 
-Scene::Scene(std::string filepath, const std::string& levelName)
+Scene::Scene(ldtk::Project* project, const std::string& levelName)
 {
-	ldtk::Project project;
-	project.loadFromFile(filepath);
+	auto* level = &project->getWorld().getLevel(levelName);
+	const auto& layers = level->allLayers();
 
-	std::cout << "Successfully loaded project file " << filepath << std::endl;
-
-	const auto& world = project.getWorld();
-	const auto& level = world.getLevel(levelName);
-	const auto& layers = level.allLayers();
-
-	for (size_t i = 0; i < layers.size(); i++)
+	for (const auto& layer : layers)
 	{
-		const auto& layer = layers[i];
-
-		if(layer.getName() == "Collisions")
+		if (layer.getName() == "Collisions")
 		{
-			for (ldtk::Entity& col : layer.getEntitiesByName("Wall")) {
-				colliders.emplace_back((float)col.getPosition().x - (float) col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
-					(float)col.getSize().x, (float)col.getSize().y);
+			for (ldtk::Entity& col : layer.getEntitiesByName("Wall"))
+			{
+				Collider c;
+				c.bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
+					(float)col.getSize().x, (float)col.getSize().y };
+				c.tag = "Wall";
+				c.isTrigger = false;
+				colliders.push_back(c);
+			}
+
+			for (ldtk::Entity& col : layer.getEntitiesByName("Ladder"))
+			{
+				Collider c;
+				c.bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
+					(float)col.getSize().x, (float)col.getSize().y };
+				c.tag = "Ladder";
+				c.isTrigger = true;
+				colliders.push_back(c);
 			}
 		}
-		else 
+		else
 		{
 			for (const auto& entity : layer.allEntities())
 			{
 				std::cout << "Creating entity " << entity.getName() << std::endl;
+				auto position = entity.getPosition();
 
 				if (entity.getName() == "Player")
 				{
 					auto p = std::make_unique<Player>();
 					p->init();
-					p->setPosition(sf::Vector2f(entity.getPosition().x, entity.getPosition().y));
+					p->setPosition((float)position.x, (float)position.y);
 					p->name = "Player";
 
 					entities.push_back(std::move(p));
@@ -60,7 +66,7 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 				{
 					auto m = std::make_unique<Mob>();
 					m->init();
-					m->setPosition(sf::Vector2f(entity.getPosition().x, entity.getPosition().y));
+					m->setPosition((float)position.x, (float)position.y);
 					m->name = entity.getName();
 
 					entities.push_back(std::move(m));
@@ -69,6 +75,8 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 			}
 		}
 
+		if (!layer.isVisible()) continue;
+
 		const ldtk::Tileset* tileSet = &layer.getTileset();
 		//layer without tiles, probably entity layer
 		if (tileSet == nullptr)
@@ -76,8 +84,8 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 			continue;
 		}
 
-		unsigned levelWidth = level.size.x / layer.getCellSize();
-		unsigned levelHeight = level.size.y / layer.getCellSize();
+		unsigned levelWidth = level->size.x / layer.getCellSize();
+		unsigned levelHeight = level->size.y / layer.getCellSize();
 
 		const size_t tileCount = levelWidth * levelHeight;
 		std::vector<ldtk::Tile> tiles;
@@ -92,7 +100,6 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 
 		TileMap map;
 		bool success = map.load("Assets/" + tileSet->path, sf::Vector2u(tileSet->tile_size, tileSet->tile_size), tiles, levelWidth, levelHeight);
-
 		if (success)
 			std::cout << "Successfully loaded layer " << layer.getName() << std::endl;
 
@@ -100,22 +107,8 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 
 		tilemaps.push_back(map);
 	}
-	std::cout << "Loaded scene " << level.name << std::endl;
-	name = level.name;
-
-	std::cout << "Scene Entity Dump:" << std::endl;
-	for (const auto &entity : entities)
-	{
-		std::cout << entity->name << std::endl;
-	}
-
-	/*ParallaxLayer layer0("Assets/Backgrounds/Glacial-mountains/Layers/sky.png", 0);
-	ParallaxLayer layer1("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png", 0);
-	ParallaxLayer layer2("Assets/Backgrounds/Glacial-mountains/Layers/glacial_mountains.png", 0);
-
-	bg.layers.push_back(layer0);
-	bg.layers.push_back(layer1);
-	bg.layers.push_back(layer2);*/
+	std::cout << "Loaded level " << level->name << std::endl;
+	name = level->name;
 }
 
 void Scene::update()
@@ -132,8 +125,6 @@ void Scene::update()
 
 void Scene::draw(sf::RenderWindow* window)
 {
-	//window->draw(bg);
-
 	//draw tiles
 	for (TileMap map : tilemaps)
 		window->draw(map);
@@ -153,8 +144,8 @@ void Scene::draw(sf::RenderWindow* window)
 		}
 
 		//draw collider boxes
-		for (auto& rect : colliders)
-			window->draw(getColliderShape(rect, sf::Color::Green));
+		for (auto& col : colliders)
+			window->draw(getColliderShape(col.bounds, sf::Color::Green));
 	}
 }
 
@@ -166,7 +157,7 @@ sf::RectangleShape getColliderShape(const sf::FloatRect& rect, sf::Color c)
 	return r;
 }
 
-GameObject* Scene::createEntity(std::string name, EntityType type, sf::Vector2<float> position, sf::Texture* texture = nullptr)
+GameObject* Scene::createEntity(std::string name, sf::Vector2<float> position, sf::Texture* texture = nullptr)
 {
 	std::unique_ptr<GameObject> entity = std::make_unique<GameObject>();
 

@@ -10,5 +10,5 @@ public:
 	void update();
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-	int health;
+	int health = 0;
 };

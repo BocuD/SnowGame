@@ -3,6 +3,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include "Collider.h"
 #include "LDtkLoader/Project.hpp"
 #include "GameObject.h"
 #include "TileMap.h"
@@ -13,7 +14,7 @@ class RigidBody;
 class Scene
 {
 public:
-	Scene(std::string filepath, const std::string& levelName);
+	Scene(ldtk::Project* project, const std::string& levelName);
 
 	bool drawColliders = false;
 
@@ -22,12 +23,12 @@ public:
 	std::string name;
 	std::vector<TileMap> tilemaps;
 
-	std::vector<sf::FloatRect> colliders;
+	std::vector<Collider> colliders;
 
 	Player* player;
 
 	void update();
 	void draw(sf::RenderWindow* window);
 
-	GameObject* createEntity(std::string name, EntityType type, sf::Vector2<float> position, sf::Texture* texture);
+	GameObject* createEntity(std::string name, sf::Vector2<float> position, sf::Texture* texture);
 };
