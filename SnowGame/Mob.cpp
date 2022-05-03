@@ -10,7 +10,7 @@ void Mob::init()
 	setTextureId(0);
 	animate = true;
 
-	colliderSize = { 20, 15 };
+	colliderSize = { 17, 13 };
 }
 
 void Mob::update()

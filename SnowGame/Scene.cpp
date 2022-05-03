@@ -52,7 +52,7 @@ Scene::Scene(std::string filepath, const std::string& levelName)
 					p->name = "Player";
 
 					entities.push_back(std::move(p));
-					player = entities.back().get();
+					player = (Player*)entities.back().get();
 
 					rigidBodies.push_back((RigidBody*)player);
 				}
@@ -142,16 +142,20 @@ void Scene::draw(sf::RenderWindow* window)
 	for (const auto& entity : entities)
 		window->draw(*entity);
 
-	//draw rigidbody boxes
-	for (auto rb : rigidBodies) 
-	{
-		rb->updateColliderRect();
-		window->draw(getColliderShape(rb->colliderRect, sf::Color::Red));
-	}
 
-	//draw collider boxes
-	for (auto& rect : colliders)
-		window->draw(getColliderShape(rect, sf::Color::Green));
+	if (drawColliders) 
+	{
+		//draw rigidbody boxes
+		for (auto rb : rigidBodies)
+		{
+			rb->updateColliderRect();
+			window->draw(getColliderShape(rb->colliderRect, sf::Color::Red));
+		}
+
+		//draw collider boxes
+		for (auto& rect : colliders)
+			window->draw(getColliderShape(rect, sf::Color::Green));
+	}
 }
 
 sf::RectangleShape getColliderShape(const sf::FloatRect& rect, sf::Color c)

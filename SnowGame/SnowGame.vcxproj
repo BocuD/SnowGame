@@ -157,6 +157,7 @@
     <ClCompile Include="AnimatedGameObject.cpp" />
     <ClCompile Include="Fonts.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Hud.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mob.cpp" />
     <ClCompile Include="ParallaxBackground.cpp" />
@@ -182,6 +183,8 @@
     <ClInclude Include="AnimatedGameObject.h" />
     <ClInclude Include="Fonts.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Hud.h" />
+    <ClInclude Include="VectorUtilities.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="ParallaxBackground.h" />
     <ClInclude Include="Player.h" />

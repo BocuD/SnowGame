@@ -49,6 +49,7 @@ void RigidBody::handleCollisions(std::vector<sf::FloatRect> colliders, std::vect
 			if (!colliding) 
 			{
 				intersectingBodies.push_back(rb);
+				onCollisionEnter(rb);
 			}
 		}
 		else
@@ -56,6 +57,7 @@ void RigidBody::handleCollisions(std::vector<sf::FloatRect> colliders, std::vect
 			if (colliding) 
 			{
 				intersectingBodies.erase(std::remove(intersectingBodies.begin(), intersectingBodies.end(), rb), intersectingBodies.end());
+				onCollisionExit(rb);
 			}
 		}
 	}

@@ -7,12 +7,15 @@
 #include "GameObject.h"
 #include "TileMap.h"
 
+class Player;
 class RigidBody;
 
 class Scene
 {
 public:
 	Scene(std::string filepath, const std::string& levelName);
+
+	bool drawColliders = false;
 
 	std::vector<std::unique_ptr<GameObject>> entities;
 	std::vector<RigidBody*> rigidBodies;
@@ -21,7 +24,7 @@ public:
 
 	std::vector<sf::FloatRect> colliders;
 
-	GameObject* player;
+	Player* player;
 
 	void update();
 	void draw(sf::RenderWindow* window);

@@ -1,5 +1,8 @@
 ﻿#include "Player.h"
+
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include "VectorUtilities.h"
 
 void Player::init()
 {
@@ -14,6 +17,8 @@ void Player::init()
 
 	colliderSize = { 20, 40 };
 	animate = true;
+
+	health = maxHealth;
 }
 
 bool upWasPressed = false;
@@ -21,27 +26,28 @@ bool shiftWasPressed = false;
 sf::Vector2f velocity;
 int disableStateMachine = 0;
 int jumpCount = 3;
+int invincibilityFrames = 0;
+int frameMod;
 
-void Player::update()
+void Player::runStateMachine(bool moving)
 {
-	bool moving = false;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+	if (invincibilityFrames > 0)
 	{
-		velocity.x -= 30;
-		moving = true;
-	}
+		invincibilityFrames--;
+		
+		if (invincibilityFrames > 45)
+		{
+			setColor({ 255, 0, 0, (sf::Uint8)((invincibilityFrames - 45) * 50)});
+		}
+		else
+		{
+			setColor({255, 255, 255, (sf::Uint8)((50 - invincibilityFrames) * 5)});
+		}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-	{
-		velocity.x += 30;
-		moving = true;
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-	{
-		std::cout << "Space button pressed" << std::endl;
-		velocity.y -= 200;
+		if (invincibilityFrames == 0)
+		{
+			setColor(sf::Color::White);
+		}
 	}
 
 	if (disableStateMachine == 0)
@@ -64,6 +70,27 @@ void Player::update()
 		}
 	}
 	else disableStateMachine--;
+}
+
+void Player::update()
+{
+	bool moving = false;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+	{
+		velocity.x -= 30;
+		moving = true;
+		setScale(-0.15f, 0.15f);
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+	{
+		velocity.x += 30;
+		moving = true;
+		setScale(0.15f, 0.15f);
+	}
+
+	runStateMachine(moving);
 
 	if (grounded) jumpCount = 3;
 
@@ -81,7 +108,7 @@ void Player::update()
 	}
 	else upWasPressed = false;
 		
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
 		move(0, 1);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
@@ -103,25 +130,40 @@ void Player::update()
 
 	velocity.y += 700 * dt;
 
-	if(velocity.x > 0) setScale(0.15f, 0.15f);
-	else setScale(-0.15f, 0.15f);
-
 	move(velocity * dt);
-
-	//if (getPosition().y >= 144) {
-	//	//velocity.y = 0;
-	//	setPosition(getPosition().x, 144);
-	//	//isGrounded = true;
-	//	jumpCount = 3;
-	//}
 
 	RigidBody::update();
 }
 
+void Player::addHealth(int amount)
+{
+	health += amount;
+	if(health > maxHealth)
+	{
+		health = maxHealth;
+	}
+}
+
+void Player::removeHealth(int amount)
+{
+	health -= amount;
+	if(health < 0)
+	{
+		health = 0;
+		std::cout << "Player died" << std::endl;
+	}
+}
+
 void Player::onCollisionEnter(RigidBody* other)
 {
+	if (invincibilityFrames > 0) return;
+
 	if(other->name == "Mob")
 	{
-		std::cout << "touched a mob, bad" << std::endl;
+		const sf::Vector2f dir = VectorUtilities::normalizeVector(other->getPosition() - getPosition());
+		velocity += -dir * 500.0f;
+		invincibilityFrames = 50;
+		setColor(sf::Color::Red);
+		removeHealth(3);
 	}
 }
