@@ -42,7 +42,8 @@ void loadBGTextures()
 int main(char* args)
 {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Snow Game");
-    window.setVerticalSyncEnabled(true);
+
+    window.setFramerateLimit(60);
 
     ldtk::Project project;
     project.loadFromFile("Assets/world.ldtk");

@@ -31,4 +31,5 @@ public:
 	void draw(sf::RenderWindow* window);
 
 	GameObject* createEntity(std::string name, sf::Vector2<float> position, sf::Texture* texture);
+	void removeEntity(GameObject* gameObject);
 };

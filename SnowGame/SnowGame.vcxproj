@@ -164,6 +164,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Snowball.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@
     <ClInclude Include="Fonts.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Hud.h" />
+    <ClInclude Include="Snowball.h" />
     <ClInclude Include="VectorUtilities.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="ParallaxBackground.h" />

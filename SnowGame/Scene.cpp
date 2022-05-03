@@ -174,3 +174,8 @@ GameObject* Scene::createEntity(std::string name, sf::Vector2<float> position, s
 
 	return entities.back().get();
 }
+
+void Scene::removeEntity(GameObject* gameObject)
+{
+	entities.erase(std::remove(entities.begin(), entities.end(), &gameObject), entities.end());
+}

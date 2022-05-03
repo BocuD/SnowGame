@@ -4,6 +4,17 @@
 #include <SFML/Window/Keyboard.hpp>
 #include "VectorUtilities.h"
 
+bool upWasPressed = false;
+bool shiftWasPressed = false;
+sf::Vector2f velocity;
+int disableStateMachine = 0;
+int jumpCount = 3;
+int invincibilityFrames = 0;
+int frameMod;
+int onLadder = 0;
+
+sf::Texture snowballTex;
+
 void Player::init()
 {
 	textureSize = { 512, 512 }; 
@@ -17,16 +28,9 @@ void Player::init()
 
 	colliderSize = { 20, 35 };
 	animate = true;
-}
 
-bool upWasPressed = false;
-bool shiftWasPressed = false;
-sf::Vector2f velocity;
-int disableStateMachine = 0;
-int jumpCount = 3;
-int invincibilityFrames = 0;
-int frameMod;
-int onLadder = 0;
+	snowballTex.loadFromFile("Assets/Sprites/snowball.png");
+}
 
 void Player::runStateMachine(bool moving)
 {
@@ -112,9 +116,14 @@ void Player::update()
 		}
 	}
 	else upWasPressed = false;
-		
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
 		move(0, 1);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
+	{
+		scene->createEntity("Snowball", getPosition(), &snowballTex);
+	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
 	{

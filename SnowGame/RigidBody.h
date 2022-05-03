@@ -12,6 +12,8 @@ public:
 	void handleCollisions(std::vector<Collider> colliders, std::vector<RigidBody*> rigidBodies);
 	void updateColliderRect();
 
+	void destroy() override;
+
 	sf::Vector2f colliderSize;
 	sf::FloatRect colliderRect;
 

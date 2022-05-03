@@ -97,3 +97,9 @@ void RigidBody::updateColliderRect()
 	const sf::Vector2f position = getPosition();
 	colliderRect = { position.x - colliderSize.x / 2, position.y - colliderSize.y, colliderSize.x, colliderSize.y };
 }
+
+void RigidBody::destroy()
+{
+	scene->rigidBodies.erase(std::remove(scene->rigidBodies.begin(), scene->rigidBodies.end(), this), scene->rigidBodies.end());
+	AnimatedGameObject::destroy();
+}

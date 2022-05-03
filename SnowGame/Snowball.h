@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "RigidBody.h"
 
-class Mob : public RigidBody
+class Snowball : public RigidBody
 {
 public:
 	void init() override;
