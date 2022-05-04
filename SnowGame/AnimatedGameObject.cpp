@@ -8,7 +8,20 @@ void AnimatedGameObject::addTexture(std::string path, int frames)
 	textures.push_back(tex);
 	frameCount.push_back(frames);
 
-	if (!hasTexture) {
+	if (!hasTexture) 
+	{
+		hasTexture = true;
+		setTextureId(0);
+	}
+}
+
+void AnimatedGameObject::addTexture(sf::Texture* tex, int frames)
+{
+	textures.push_back(*tex);
+	frameCount.push_back(frames);
+
+	if (!hasTexture) 
+	{
 		hasTexture = true;
 		setTextureId(0);
 	}

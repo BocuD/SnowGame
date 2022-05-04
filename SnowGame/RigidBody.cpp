@@ -5,40 +5,51 @@
 #include <SFML/Graphics/Rect.hpp>
 
 #include "Collider.h"
+#include "Scene.h"
+#include "VectorUtilities.h"
 
-void RigidBody::handleCollisions(std::vector<Collider> colliders, std::vector<RigidBody*> rigidBodies)
+using ::VectorUtilities;
+
+void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidBody*> rigidBodies, float dt)
 {
-	// do collision checks
+	//save temp position
+	lastPosition = getPosition();
+
+	//apply velocity
+	move(velocity * dt);
+
+	//update collider rect
 	updateColliderRect();
 
-	for (Collider& col : colliders)
+	//handle collisions
+	for (auto col : colliders)
 	{
 		sf::FloatRect intersect;
 
-		if (col.isTrigger) //handle trigger events
+		if (col->isTrigger) //handle trigger events
 		{
-			const bool wasInTrigger = std::find(intersectingTriggers.begin(), intersectingTriggers.end(), &col) != intersectingTriggers.end();
+			const bool wasInTrigger = std::find(intersectingTriggers.begin(), intersectingTriggers.end(), col) != intersectingTriggers.end();
 
-			if (colliderRect.intersects(col.bounds, intersect))
+			if (colliderRect.intersects(col->bounds, intersect))
 			{
 				if (!wasInTrigger)
 				{
-					intersectingTriggers.push_back(&col);
-					onTriggerEnter(&col);
+					intersectingTriggers.push_back(col);
+					onTriggerEnter(col);
 				}
 			}
 			else
 			{
 				if (wasInTrigger)
 				{
-					intersectingTriggers.erase(std::remove(intersectingTriggers.begin(), intersectingTriggers.end(), &col), intersectingTriggers.end());
-					onTriggerExit(&col);
+					intersectingTriggers.erase(std::remove(intersectingTriggers.begin(), intersectingTriggers.end(), col), intersectingTriggers.end());
+					onTriggerExit(col);
 				}
 			}
 		}
 		else //resolve collisions
 		{
-			if (colliderRect.intersects(col.bounds, intersect))
+			if (colliderRect.intersects(col->bounds, intersect))
 			{
 				if (intersect.width < intersect.height)
 				{
@@ -90,16 +101,19 @@ void RigidBody::handleCollisions(std::vector<Collider> colliders, std::vector<Ri
 			}
 		}
 	}
+
+	//calculate actual velocity
+	//sf::Vector2f actualVelocity
+	velocity = (getPosition() - lastPosition) / dt;
+
+	//if(VectorUtilities::vectorLength(actualVelocity) < VectorUtilities::vectorLength(velocity))
+	//{
+	//	  velocity = actualVelocity;
+	//}
 }
 
 void RigidBody::updateColliderRect()
 {
-	const sf::Vector2f position = getPosition();
+	const sf::Vector2f position = getPosition() + colliderOffset;
 	colliderRect = { position.x - colliderSize.x / 2, position.y - colliderSize.y, colliderSize.x, colliderSize.y };
-}
-
-void RigidBody::destroy()
-{
-	scene->rigidBodies.erase(std::remove(scene->rigidBodies.begin(), scene->rigidBodies.end(), this), scene->rigidBodies.end());
-	AnimatedGameObject::destroy();
 }

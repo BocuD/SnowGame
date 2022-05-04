@@ -1,14 +1,11 @@
 ﻿#include "TileMap.h"
 
-bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vector<ldtk::Tile> tiles, unsigned width, unsigned height)
+bool TileMap::load(sf::Texture* tileset, sf::Vector2u tileSize, std::vector<ldtk::Tile> tiles, unsigned width, unsigned height)
 {
-	// load the tileset texture
-	if (!m_tileset.loadFromFile(tileset))
-		return false;
-
+	texture = tileset;
 	// resize the vertex array to fit the level size
-	m_vertices.setPrimitiveType(sf::Quads);
-	m_vertices.resize(width * height * 4);
+	vertices.setPrimitiveType(sf::Quads);
+	vertices.resize(width * height * 4);
 
 	// populate the vertex array, with one quad per tile
 	for (unsigned i = 0; i < width; ++i) 
@@ -24,11 +21,11 @@ bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vecto
 #pragma warning(disable : 4244)
 
 			// find its position in the tileset texture
-			const float tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
-			const float tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
+			const float tu = tileNumber % (tileset->getSize().x / tileSize.x);
+			const float tv = tileNumber / (tileset->getSize().x / tileSize.x);
 
 			// get a pointer to the current tile's quad
-			sf::Vertex* quad = &m_vertices[(i + j * width) * 4];
+			sf::Vertex* quad = &vertices[(i + j * width) * 4];
 
 			// define its 4 corners
 			quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
@@ -74,8 +71,8 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.transform *= getTransform();
 
 	// apply the tileset texture
-	states.texture = &m_tileset;
+	states.texture = texture;
 
 	// draw the vertex array
-	target.draw(m_vertices, states);
+	target.draw(vertices, states);
 }

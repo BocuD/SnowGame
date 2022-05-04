@@ -4,7 +4,7 @@
 class Hud : public sf::Drawable
 {
 public:
-	sf::Sprite* hearts[5];
+	sf::Sprite* hearts = new sf::Sprite[5];
 	void init();
 	void updateHeartSprite(int heart, int step, bool moveDown);
 	void update();

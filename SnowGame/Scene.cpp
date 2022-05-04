@@ -1,16 +1,11 @@
 ﻿#include "Scene.h"
 
-#include <utility>
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include "Game.h"
+#include "LoadTrigger.h"
 #include "Mob.h"
 #include "ParallaxBackground.h"
-#include "Player.h"
-
-namespace sf
-{
-	class RectangleShape;
-}
 
 sf::RectangleShape getColliderShape(const sf::FloatRect& rect, sf::Color c);
 
@@ -25,22 +20,36 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 		{
 			for (ldtk::Entity& col : layer.getEntitiesByName("Wall"))
 			{
-				Collider c;
-				c.bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
+				Collider* c = new Collider;
+				c->bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
 					(float)col.getSize().x, (float)col.getSize().y };
-				c.tag = "Wall";
-				c.isTrigger = false;
+				c->tag = "Wall";
+				c->isTrigger = false;
 				colliders.push_back(c);
 			}
 
 			for (ldtk::Entity& col : layer.getEntitiesByName("Ladder"))
 			{
-				Collider c;
-				c.bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
+				Collider* c = new Collider;
+				c->bounds = { (float)col.getPosition().x - (float)col.getSize().x / 2, (float)col.getPosition().y - (float)col.getSize().y ,
 					(float)col.getSize().x, (float)col.getSize().y };
-				c.tag = "Ladder";
-				c.isTrigger = true;
+
+				c->tag = "Ladder";
+				c->isTrigger = true;
 				colliders.push_back(c);
+			}
+
+			for (ldtk::Entity& loadLevel : layer.getEntitiesByName("LoadTrigger"))
+			{
+				LoadTrigger* trigger = new LoadTrigger;
+				trigger->bounds = { (float)loadLevel.getPosition().x - (float)loadLevel.getSize().x / 2, (float)loadLevel.getPosition().y - (float)loadLevel.getSize().y ,
+					(float)loadLevel.getSize().x, (float)loadLevel.getSize().y };
+
+				trigger->tag = "LoadTrigger";
+				trigger->levelName = loadLevel.getField<std::string>("levelName").value();
+				trigger->spawnPos = { loadLevel.getField<float>("xPos").value(), loadLevel.getField<float>("yPos").value() };
+				trigger->isTrigger = true;
+				colliders.push_back(trigger);
 			}
 		}
 		else
@@ -48,29 +57,17 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 			for (const auto& entity : layer.allEntities())
 			{
 				std::cout << "Creating entity " << entity.getName() << std::endl;
-				auto position = entity.getPosition();
+				sf::Vector2f position = { (float)entity.getPosition().x, (float)entity.getPosition().y };
 
 				if (entity.getName() == "Player")
 				{
-					auto p = std::make_unique<Player>();
-					p->init();
-					p->setPosition((float)position.x, (float)position.y);
-					p->name = "Player";
-
-					entities.push_back(std::move(p));
-					player = (Player*)entities.back().get();
-
-					rigidBodies.push_back((RigidBody*)player);
+					player = createEntity<Player>(entity.getName(), position);
+					addRigidBody(player);
 				}
 				else if (entity.getName() == "Mob")
 				{
-					auto m = std::make_unique<Mob>();
-					m->init();
-					m->setPosition((float)position.x, (float)position.y);
-					m->name = entity.getName();
-
-					entities.push_back(std::move(m));
-					rigidBodies.push_back((RigidBody*)entities.back().get());
+					auto m = createEntity<Mob>(entity.getName(), position);
+					addRigidBody(m);
 				}
 			}
 		}
@@ -98,36 +95,84 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 			}
 		}
 
-		TileMap map;
-		bool success = map.load("Assets/" + tileSet->path, sf::Vector2u(tileSet->tile_size, tileSet->tile_size), tiles, levelWidth, levelHeight);
+		TileMap* map = new TileMap;
+		bool success = map->load(TextureManager::getTexture("Assets/" + tileSet->path), sf::Vector2u(tileSet->tile_size, tileSet->tile_size), tiles, levelWidth, levelHeight);
 		if (success)
 			std::cout << "Successfully loaded layer " << layer.getName() << std::endl;
 
-		map.setScale(1, 1);
+		map->setScale(1, 1);
 
 		tilemaps.push_back(map);
 	}
 	std::cout << "Loaded level " << level->name << std::endl;
 	name = level->name;
+	sceneRect = {0, 0, (float)level->size.x, (float)level->size.y};
+}
+
+Scene::~Scene()
+{
+	for (auto& tilemap : tilemaps)
+	{
+		delete tilemap;
+	}
+
+	for (auto& obj : entities)
+	{
+		delete obj;
+	}
+
+	for (auto& col : colliders)
+	{
+		delete col;
+	}
 }
 
 void Scene::update()
 {
-	for (const auto& entity : entities)
+	//update entities
+	size_t entityCount = entities.size();
+	for (int i = 0; i < entityCount; i++)
 	{
-		entity->update();
+		entities[i]->update();
 	}
 
 	//run collision detection
-	for (auto rb : rigidBodies)
-		rb->handleCollisions(colliders, rigidBodies);
+	for (auto& rb : rigidBodies)
+	{
+		rb->physicsTick(colliders, rigidBodies, 1/60.f);
+	}
+
+	for (auto& rb : rigidBodies)
+	{
+		if(rb->destroyed)
+		{
+			removeRigidBody(rb);
+		}
+	}
+
+	for (auto& entity : entities)
+	{
+		if(entity->destroyed)
+		{
+			entity->onDestroy();
+			delete entity;
+			removeEntity(entity);
+		}
+	}
+
+	if(destroyed)
+	{
+		destroy();
+		Game::removeScene(this);
+
+	}
 }
 
 void Scene::draw(sf::RenderWindow* window)
 {
 	//draw tiles
-	for (TileMap map : tilemaps)
-		window->draw(map);
+	for (auto map : tilemaps)
+		window->draw(*map);
 
 	//draw entities
 	for (const auto& entity : entities)
@@ -145,7 +190,7 @@ void Scene::draw(sf::RenderWindow* window)
 
 		//draw collider boxes
 		for (auto& col : colliders)
-			window->draw(getColliderShape(col.bounds, sf::Color::Green));
+			window->draw(getColliderShape(col->bounds, sf::Color::Green));
 	}
 }
 
@@ -157,25 +202,46 @@ sf::RectangleShape getColliderShape(const sf::FloatRect& rect, sf::Color c)
 	return r;
 }
 
-GameObject* Scene::createEntity(std::string name, sf::Vector2<float> position, sf::Texture* texture = nullptr)
-{
-	std::unique_ptr<GameObject> entity = std::make_unique<GameObject>();
+template <class T>
 
+T* Scene::createEntity(std::string name, sf::Vector2<float> position)
+{
+	auto* entity = new T;
 	entity->name = name;
 	entity->setPosition(position);
-	entity->init();
 
-	if(texture != nullptr)
-	{
-		entity->setTexture(*texture);
-	}
+	addEntity(entity);
 
-	entities.push_back(std::move(entity));
-
-	return entities.back().get();
+	return (T*)entities.back();
 }
 
-void Scene::removeEntity(GameObject* gameObject)
+void Scene::addRigidBody(RigidBody* rb)
 {
-	entities.erase(std::remove(entities.begin(), entities.end(), &gameObject), entities.end());
+	std::cout << "adding rigidbody to scene: " << rb << std::endl;
+	rigidBodies.push_back(rb);
+}
+
+void Scene::addEntity(GameObject* entity)
+{
+	std::cout << "adding entity to scene: " << entity << std::endl;
+	entity->scene = this;
+	entities.push_back(entity);
+	entity->init();
+}
+
+void Scene::removeRigidBody(RigidBody* rb)
+{
+	std::cout << "removing rigidbody from scene: " << rb << std::endl;
+	rigidBodies.erase(std::remove(rigidBodies.begin(), rigidBodies.end(), rb), rigidBodies.end());
+}
+
+void Scene::removeEntity(GameObject* entity)
+{
+	std::cout << "removing entity from scene: " << entity << std::endl;
+	entities.erase(std::remove(entities.begin(), entities.end(), entity), entities.end());
+}
+
+void Scene::destroy()
+{
+	destroyed = true;
 }

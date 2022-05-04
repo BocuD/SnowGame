@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="AnimatedGameObject.cpp" />
     <ClCompile Include="Fonts.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="main.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Snowball.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +186,12 @@
     <ClInclude Include="AnimatedGameObject.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="Fonts.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="LoadTrigger.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Snowball.h" />
+    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="VectorUtilities.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="ParallaxBackground.h" />

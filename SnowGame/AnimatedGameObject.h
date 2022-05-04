@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <vector>
-
 #include "GameObject.h"
 
 class AnimatedGameObject : public GameObject
@@ -17,6 +16,8 @@ public:
 	int textureId = 0;
 
 	void addTexture(std::string path, int frames);
+	void addTexture(sf::Texture* tex, int frames);
+
 	void setTextureId(int id);
 	void setAnimationFrame(int frame);
 	void update() override;

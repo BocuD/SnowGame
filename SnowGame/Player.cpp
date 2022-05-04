@@ -2,34 +2,36 @@
 
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Keyboard.hpp>
-#include "VectorUtilities.h"
 
-bool upWasPressed = false;
-bool shiftWasPressed = false;
-sf::Vector2f velocity;
-int disableStateMachine = 0;
-int jumpCount = 3;
-int invincibilityFrames = 0;
-int frameMod;
-int onLadder = 0;
+#include "Game.h";
+#include "LoadTrigger.h"
+#include "Mob.h"
+#include "Scene.h"
+#include "Snowball.h"
+#include "TextureManager.h"
+#include "VectorUtilities.h"
 
 sf::Texture snowballTex;
 
 void Player::init()
 {
 	textureSize = { 512, 512 }; 
-	setOrigin(255, 400);
+	setOrigin(255, 390);
 	setScale(0.15f, 0.15f);
-	addTexture("Assets/Sprites/BlueWizard/idle.png", 20);
-	addTexture("Assets/Sprites/BlueWizard/walk.png", 20);
-	addTexture("Assets/Sprites/BlueWizard/jump.png", 8);
-	addTexture("Assets/Sprites/BlueWizard/dash.png", 16);
+	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/idle.png"), 20);
+	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/walk.png"), 20);
+	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/jump.png"), 8);
+	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/dash.png"), 16);
 	setTextureId(0);
 
 	colliderSize = { 20, 35 };
 	animate = true;
 
 	snowballTex.loadFromFile("Assets/Sprites/snowball.png");
+
+	health = maxHealth;
+
+	invincibilityFrames = 50;
 }
 
 void Player::runStateMachine(bool moving)
@@ -81,14 +83,14 @@ void Player::update()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 	{
-		velocity.x -= 30;
+		velocity.x -= 35;
 		moving = true;
 		setScale(-0.15f, 0.15f);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 	{
-		velocity.x += 30;
+		velocity.x += 35;
 		moving = true;
 		setScale(0.15f, 0.15f);
 	}
@@ -122,12 +124,39 @@ void Player::update()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
 	{
-		scene->createEntity("Snowball", getPosition(), &snowballTex);
+		spaceWasPressed = true;
+	}
+	else
+	{
+		if(spaceWasPressed)
+		{
+			auto snowball = new Snowball();
+			snowball->name = "Snowball";
+			snowball->setPosition(getPosition());
+
+			snowball->velocity.y = -100;
+
+			if (velocity.x > 0)
+			{
+				snowball->velocity.x = velocity.x + 100;
+				snowball->move(7, -20);
+			}
+			else
+			{
+				snowball->velocity.x = velocity.x - 100;
+				snowball->move(-7, -20);
+			}
+
+			scene->addEntity(snowball);
+			scene->addRigidBody(snowball);
+
+			spaceWasPressed = false;
+		}
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
 	{
-		if (!shiftWasPressed && grounded) 
+		if (!shiftWasPressed && grounded)
 		{
 			shiftWasPressed = true;
 			velocity.x *= 4;
@@ -137,14 +166,11 @@ void Player::update()
 		}
 	}
 	else shiftWasPressed = false;
-	const float dt = 1 / 60.0f;
 
 	velocity.y *= 0.93f;
 	velocity.x *= 0.8f;
 
-	velocity.y += 700 * dt;
-
-	move(velocity * dt);
+	velocity.y += 14;
 
 	RigidBody::update();
 }
@@ -170,10 +196,10 @@ void Player::removeHealth(int amount)
 
 void Player::onCollisionEnter(RigidBody* other)
 {
-	if (invincibilityFrames > 0) return;
-
 	if(other->name == "Mob")
 	{
+		if (invincibilityFrames > 0) return;
+
 		const sf::Vector2f dir = VectorUtilities::normalizeVector(other->getPosition() - getPosition());
 		velocity += -dir * 500.0f;
 		invincibilityFrames = 50;
@@ -187,6 +213,20 @@ void Player::onTriggerEnter(Collider* other)
 	if(other->tag == "Ladder")
 	{
 		onLadder++;
+	}
+	else if(other->tag == "LoadTrigger")
+	{
+		if (invincibilityFrames > 0) return;
+
+		LoadTrigger* trigger = (LoadTrigger*)other;
+		Scene* currentScene = scene;
+
+		Game::loadScene(trigger->levelName, [trigger, currentScene](Scene* newScene)
+		{
+			Game::setActiveScene(newScene);
+			newScene->player->setPosition(trigger->spawnPos);
+			currentScene->destroy();
+		});
 	}
 }
 

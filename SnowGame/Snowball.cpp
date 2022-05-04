@@ -1,11 +1,33 @@
 ﻿#include "Snowball.h"
 
+#include "TextureManager.h"
+
 void Snowball::init()
 {
-	name = "Snowball";
+	textureSize = { 16, 16 };
+	setOrigin(8, 8);
+	delayFrames = 3;
+	addTexture(TextureManager::getTexture("Assets/Sprites/snowball.png"), 1);
+	setTextureId(0);
+	animate = true;
+	
+	colliderSize = { 9, 9 };
+	colliderOffset = { 0, 4.5f };
 }
 
 void Snowball::update()
 {
+	velocity.y *= 0.93f;
+	velocity.y += 14;
+
+	if (grounded)
+	{
+		velocity.x *= 0.92f;
+		rotate(velocity.x * 0.3f);
+	}
+
 	RigidBody::update();
+
+	num--;
+	if (num == 0) destroy();
 }

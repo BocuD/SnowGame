@@ -17,6 +17,15 @@ public:
 	void onTriggerEnter(Collider* other) override;
 	void onTriggerExit(Collider* other) override;
 
-	float health = maxHealth;
+	float health;
 	const float maxHealth = 25;
+
+	bool upWasPressed = false;
+	bool shiftWasPressed = false;
+	bool spaceWasPressed = false;
+	int disableStateMachine = 0;
+	int jumpCount = 3;
+	int invincibilityFrames = 0;
+	int frameMod;
+	int onLadder = 0;
 };

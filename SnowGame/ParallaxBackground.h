@@ -14,6 +14,8 @@ public:
 	void addLayer(std::string texturePath);
 	void update(sf::Vector2f camPos);
 
+	sf::Vector2f offset;
+
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };

@@ -9,10 +9,10 @@
 class RigidBody : public AnimatedGameObject
 {
 public:
-	void handleCollisions(std::vector<Collider> colliders, std::vector<RigidBody*> rigidBodies);
+	void physicsTick(std::vector<Collider*> colliders, std::vector<RigidBody*> rigidBodies, float dt);
 	void updateColliderRect();
 
-	void destroy() override;
+	sf::Vector2f velocity;
 
 	sf::Vector2f colliderSize;
 	sf::FloatRect colliderRect;
@@ -20,11 +20,15 @@ public:
 	std::vector<RigidBody*> intersectingBodies;
 	std::vector<Collider*> intersectingTriggers;
 
-	bool grounded = true;
+	bool grounded = false;
+	sf::Vector2f colliderOffset;
 
 	virtual void onCollisionEnter(RigidBody* other) {};
 	virtual void onCollisionExit(RigidBody* other) {};
 
 	virtual void onTriggerEnter(Collider* other) {};
 	virtual void onTriggerExit(Collider* other) {};
+
+private:
+	sf::Vector2f lastPosition;
 };

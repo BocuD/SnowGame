@@ -22,7 +22,7 @@ void ParallaxBackground::update(const sf::Vector2f camPos)
 {
 	for(size_t i = 0; i < sprites.size(); i++)
 	{
-		sprites[i].setPosition(camPos * (float)i);
+		sprites[i].setPosition(camPos * (float)i + offset);
 	}
 }
 

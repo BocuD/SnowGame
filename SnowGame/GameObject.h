@@ -2,21 +2,18 @@
 #include <string>
 #include <SFML/Graphics/Sprite.hpp>
 
-#include "Scene.h"
-
-//#include "Component.h"
+class Scene;
 
 class GameObject : public sf::Sprite
 {
 public:
 	std::string name;
 	Scene* scene;
+	bool destroyed = false;
 
 	virtual void init() {};
 	virtual void update() {};
 
-	virtual void destroy()
-	{
-		scene->removeEntity(this);
-	}
+	virtual void destroy();
+	virtual void onDestroy() {};
 };
