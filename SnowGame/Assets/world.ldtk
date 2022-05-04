@@ -9326,7 +9326,7 @@
 									"id": "V_String",
 									"params": ["World_Level_0"]
 								}] },
-								{ "__identifier": "xPos", "__value": 0, "__type": "Float", "__tile": null, "defUid": 195, "realEditorValues": [null] },
+								{ "__identifier": "xPos", "__value": 808, "__type": "Float", "__tile": null, "defUid": 195, "realEditorValues": [{ "id": "V_Float", "params": [808] }] },
 								{ "__identifier": "yPos", "__value": 50, "__type": "Float", "__tile": null, "defUid": 196, "realEditorValues": [{ "id": "V_Float", "params": [50] }] }
 							]
 						},
