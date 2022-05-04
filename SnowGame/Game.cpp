@@ -60,7 +60,7 @@ void Game::init()
     //force cache all tilemaps
     for (auto tileset : project->allTilesets())
     {
-        TextureManager::getTexture("Assets" + tileset.path);
+        TextureManager::getTexture("Assets/" + tileset.path);
     }
 
     std::cout << "Successfully loaded project file " << project->getFilePath() << std::endl;
