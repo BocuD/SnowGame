@@ -113,14 +113,14 @@ void Player::fixedUpdate()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 	{
-		velocity.x -= 35;
+		velocity.x -= 40;
 		moving = true;
 		setScale(-0.15f, 0.15f);
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
 	{
-		velocity.x += 35;
+		velocity.x += 40;
 		moving = true;
 		setScale(0.15f, 0.15f);
 	}
@@ -150,7 +150,7 @@ void Player::fixedUpdate()
 		{
 			if (textureId != 1)
 			{
-				delayFrames = 3;
+				delayFrames = 2;
 				setTextureId(1);
 			}
 		}
@@ -165,10 +165,10 @@ void Player::fixedUpdate()
 	}
 	else disableStateMachine--;
 
-	velocity.y *= 0.93f;
+	velocity.y *= 0.97f;
 	velocity.x *= 0.8f;
 
-	velocity.y += 14;
+	velocity.y += 15;
 
 	RigidBody::fixedUpdate();
 }
