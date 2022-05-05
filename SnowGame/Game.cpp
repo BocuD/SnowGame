@@ -65,7 +65,7 @@ void Game::init()
 
     std::cout << "Successfully loaded project file " << project->getFilePath() << std::endl;
 
-    Scene* scene = new Scene(project, "World_Level_1");
+    Scene* scene = new Scene(project, "World_Level_0");
     addScene(scene);
     setActiveScene(scene);
 
