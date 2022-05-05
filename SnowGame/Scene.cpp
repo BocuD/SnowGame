@@ -100,8 +100,6 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 		if (success)
 			std::cout << "Successfully loaded layer " << layer.getName() << std::endl;
 
-		map->setScale(1, 1);
-
 		tilemaps.push_back(map);
 	}
 	std::cout << "Loaded level " << level->name << std::endl;

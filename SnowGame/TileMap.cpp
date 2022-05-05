@@ -34,10 +34,10 @@ bool TileMap::load(sf::Texture* tileset, sf::Vector2u tileSize, std::vector<ldtk
 			quad[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
 
 			// define its 4 texture coordinates
-			quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-			quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-			quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-			quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+			quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y) + sf::Vector2f(0.5f, 0.5f);
+			quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y) + sf::Vector2f(-0.5f, 0.5f);
+			quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y) + sf::Vector2f(-0.5f, -0.5f);
+			quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y) + sf::Vector2f(0.5f, -0.5f);
 
 #pragma warning(pop)
 
