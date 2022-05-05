@@ -10,7 +10,7 @@ const float dt = 1/60.f;
 int main(char* args)
 {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Snow Game");
-    //window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(true);
 
     game = new Game;
     game->init();

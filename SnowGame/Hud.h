@@ -8,6 +8,7 @@ public:
 	void init();
 	void updateHeartSprite(int heart, int step, bool moveDown);
 	void update();
+	static void incCoinCount();
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 	int health = 0;

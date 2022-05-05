@@ -3,7 +3,9 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#include "Coin.h"
 #include "Game.h";
+#include "Hud.h"
 #include "LoadTrigger.h"
 #include "Mob.h"
 #include "Scene.h"
@@ -204,11 +206,16 @@ void Player::onCollisionEnter(RigidBody* other)
 		setColor(sf::Color::Red);
 		removeHealth(3);
 	}
+	else if(other->name == "Coin")
+	{
+		((Coin*)other)->pickup();
+		Hud::incCoinCount();
+	}
 }
 
 void Player::onTriggerEnter(Collider* other)
 {
-	if(other->tag == "Ladder")
+	if (other->tag == "Ladder")
 	{
 		onLadder++;
 	}

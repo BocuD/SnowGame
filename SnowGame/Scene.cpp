@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include "Coin.h"
 #include "Game.h"
 #include "LoadTrigger.h"
 #include "Mob.h"
@@ -68,6 +69,11 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 				{
 					auto m = createEntity<Mob>(entity.getName(), position);
 					addRigidBody(m);
+				}
+				else if (entity.getName() == "Coin")
+				{
+					auto c = createEntity<Coin>(entity.getName(), position);
+					addRigidBody(c);
 				}
 			}
 		}

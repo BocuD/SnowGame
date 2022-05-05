@@ -49,6 +49,31 @@ void loadBGTextures()
     background.sprites[5].setTexture(t5);
 }
 
+void resetViews()
+{
+    sf::FloatRect sceneRect = activeScene->sceneRect;
+
+    sceneView->zoom(720 / sceneView->getSize().y * 0.3f);
+    hudView->zoom(720 / hudView->getSize().y);
+    backgroundView->zoom(720 / backgroundView->getSize().y);
+
+    hudView->setCenter(hudView->getSize().x / 2, hudView->getSize().y / 2);
+
+    if (sceneRect.height < sceneView->getSize().y)
+    {
+        float diff = sceneRect.height / sceneView->getSize().y;
+        sceneView->setSize(diff * sceneView->getSize());
+        backgroundView->setSize(diff * backgroundView->getSize());
+    }
+
+    if (sceneRect.width < sceneView->getSize().x)
+    {
+        float diff = sceneRect.width / sceneView->getSize().x;
+        sceneView->setSize(diff * sceneView->getSize());
+        backgroundView->setSize(diff * backgroundView->getSize());
+    }
+}
+
 void Game::init()
 {
     //force cache some textures
@@ -65,21 +90,18 @@ void Game::init()
 
     std::cout << "Successfully loaded project file " << project->getFilePath() << std::endl;
 
+    sceneView = new sf::View({ 0, 0, 1280, 720 });
+    hudView = new sf::View({ 0, 0, 1280, 720 });
+    backgroundView = new sf::View({ 0, 0, 1280, 720 });
+
     Scene* scene = new Scene(project, "World_Level_0");
     addScene(scene);
+
     setActiveScene(scene);
 
     hud.init();
 
     Fonts::loadFonts();
-
-    sceneView = new sf::View({ 0, 0, 1280, 720 });
-    hudView = new sf::View({ 0, 0, 1280, 720 });
-    backgroundView = new sf::View({ 0, 0, 1280, 720 });
-
-    sceneView->zoom(0.3f);
-    hudView->zoom(1.0f);
-    backgroundView->zoom(1.0f);
 
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png");
@@ -143,6 +165,8 @@ Scene* Game::getActiveScene()
 void Game::setActiveScene(Scene* scene)
 {
     activeScene = scene;
+
+    resetViews();
 }
 
 ldtk::Project* Game::getProject()
@@ -154,12 +178,12 @@ void Game::draw(sf::RenderWindow* window)
 {
     //center view to player after running update()
     sceneView->setCenter(activeScene->player->getPosition());
+    sf::FloatRect sceneRect = activeScene->sceneRect;
 
     sf::Vector2f center = sceneView->getCenter();
     sf::Vector2f size = sceneView->getSize();
 
     sf::FloatRect viewRect = { center.x - size.x / 2, center.y - size.y / 2, size.x, size.y };
-    sf::FloatRect sceneRect = activeScene->sceneRect;
 
     if (viewRect.left < sceneRect.left) viewRect.left = sceneRect.left;
     if (viewRect.left + viewRect.width > sceneRect.left + sceneRect.width) viewRect.left = sceneRect.left + sceneRect.width - viewRect.width;
@@ -196,12 +220,7 @@ void Game::eventHandler(const sf::Event e)
         sceneView->setSize({ (float)e.size.width, (float)e.size.height });
         hudView->setSize({ (float)e.size.width, (float)e.size.height });
         backgroundView->setSize({ (float)e.size.width, (float)e.size.height });
-
-        sceneView->zoom(720 / sceneView->getSize().y * 0.3f);
-        hudView->zoom(720 / hudView->getSize().y);
-        backgroundView->zoom(720 / backgroundView->getSize().y);
-
-        hudView->setCenter(hudView->getSize().x / 2, hudView->getSize().y / 2);
+        resetViews();
         break;
     case sf::Event::EventType::GainedFocus:
         break;
