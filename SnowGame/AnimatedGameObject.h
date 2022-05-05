@@ -20,7 +20,7 @@ public:
 
 	void setTextureId(int id);
 	void setAnimationFrame(int frame);
-	void update() override;
+	void fixedUpdate() override;
 
 private:
 	bool hasTexture = false;;

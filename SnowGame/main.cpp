@@ -2,12 +2,10 @@
 #include <SFML/Graphics.hpp>
 
 #include "Scene.h"
-#include "Fonts.h"
 #include "Game.h"
-#include "Player.h"
-#include "ParallaxBackground.h"
 
 Game* game;
+const float dt = 1/60.f;
 
 int main(char* args)
 {
@@ -17,10 +15,18 @@ int main(char* args)
     game = new Game;
     game->init();
 
-    sf::Clock timer;
-    timer.restart();
+    sf::Clock frameClock;
+    sf::Clock fixedClock;
 
-    while (window.isOpen()) {
+    frameClock.restart();
+    fixedClock.restart();
+
+    float fixedUpdateTimer = 0.f;
+
+    while (window.isOpen()) 
+    {
+        float updateTime = frameClock.getElapsedTime().asSeconds();
+        frameClock.restart();
 
         sf::Event e;
         while (window.pollEvent(e)) 
@@ -37,16 +43,24 @@ int main(char* args)
             }
         }
 
+        fixedUpdateTimer += fixedClock.getElapsedTime().asSeconds();
+        fixedClock.restart();
+
+        while(fixedUpdateTimer >= dt)
+        {
+            game->fixedUpdate();
+            fixedUpdateTimer -= dt;
+        }
+
         window.clear();
 
-        game->update();
+        game->update(updateTime);
         game->draw(&window);
 
         //draw fps counter in window title
         std::string windowTitle = "Snow Game -- FPS: " + 
-            std::to_string(1000000 / timer.getElapsedTime().asMicroseconds());
+            std::to_string(1 / updateTime).substr(0, 5);
         window.setTitle(windowTitle);
-        timer.restart();
 
         window.display();
     }

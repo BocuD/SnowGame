@@ -7,8 +7,8 @@ class Player : public RigidBody
 {
 public:
 	void init() override;
-	void runStateMachine(bool moving);
-	void update() override;
+	void update(float dt) override;
+	void fixedUpdate() override;
 
 	void addHealth(int amount);
 	void removeHealth(int amount);
@@ -23,6 +23,7 @@ public:
 	bool upWasPressed = false;
 	bool shiftWasPressed = false;
 	bool spaceWasPressed = false;
+	bool moving = false;
 	int disableStateMachine = 0;
 	int jumpCount = 3;
 	int invincibilityFrames = 0;

@@ -34,72 +34,12 @@ void Player::init()
 	invincibilityFrames = 50;
 }
 
-void Player::runStateMachine(bool moving)
+void Player::update(float dt)
 {
-	if (invincibilityFrames > 0)
-	{
-		invincibilityFrames--;
-		
-		if (invincibilityFrames > 45)
-		{
-			setColor({ 255, 0, 0, (sf::Uint8)((invincibilityFrames - 45) * 50)});
-		}
-		else
-		{
-			setColor({255, 255, 255, (sf::Uint8)((50 - invincibilityFrames) * 5)});
-		}
-
-		if (invincibilityFrames == 0)
-		{
-			setColor(sf::Color::White);
-		}
-	}
-
-	if (disableStateMachine == 0)
-	{
-		if (moving && grounded)
-		{
-			if (textureId != 1)
-			{
-				delayFrames = 3;
-				setTextureId(1);
-			}
-		}
-		else
-		{
-			if (textureId != 0)
-			{
-				delayFrames = 4;
-				setTextureId(0);
-			}
-		}
-	}
-	else disableStateMachine--;
-}
-
-void Player::update()
-{
-	bool moving = false;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-	{
-		velocity.x -= 35;
-		moving = true;
-		setScale(-0.15f, 0.15f);
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-	{
-		velocity.x += 35;
-		moving = true;
-		setScale(0.15f, 0.15f);
-	}
-
-	runStateMachine(moving);
-
 	if (grounded) jumpCount = 3;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) 
+	{
 		if(onLadder > 0)
 		{
 			velocity.y = -100;
@@ -118,9 +58,6 @@ void Player::update()
 		}
 	}
 	else upWasPressed = false;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-		move(0, 1);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
 	{
@@ -167,12 +104,73 @@ void Player::update()
 	}
 	else shiftWasPressed = false;
 
+	RigidBody::update(dt);
+}
+
+void Player::fixedUpdate()
+{
+	moving = false;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+	{
+		velocity.x -= 35;
+		moving = true;
+		setScale(-0.15f, 0.15f);
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+	{
+		velocity.x += 35;
+		moving = true;
+		setScale(0.15f, 0.15f);
+	}
+
+	if (invincibilityFrames > 0)
+	{
+		invincibilityFrames--;
+
+		if (invincibilityFrames > 45)
+		{
+			setColor({ 255, 0, 0, (sf::Uint8)((invincibilityFrames - 45) * 50) });
+		}
+		else
+		{
+			setColor({ 255, 255, 255, (sf::Uint8)((50 - invincibilityFrames) * 5) });
+		}
+
+		if (invincibilityFrames == 0)
+		{
+			setColor(sf::Color::White);
+		}
+	}
+
+	if (disableStateMachine == 0)
+	{
+		if (moving && grounded)
+		{
+			if (textureId != 1)
+			{
+				delayFrames = 3;
+				setTextureId(1);
+			}
+		}
+		else
+		{
+			if (textureId != 0)
+			{
+				delayFrames = 4;
+				setTextureId(0);
+			}
+		}
+	}
+	else disableStateMachine--;
+
 	velocity.y *= 0.93f;
 	velocity.x *= 0.8f;
 
 	velocity.y += 14;
 
-	RigidBody::update();
+	RigidBody::fixedUpdate();
 }
 
 void Player::addHealth(int amount)

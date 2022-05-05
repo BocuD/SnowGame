@@ -12,7 +12,8 @@ public:
 	bool destroyed = false;
 
 	virtual void init() {};
-	virtual void update() {};
+	virtual void update(float dt) {};
+	virtual void fixedUpdate() {};
 
 	virtual void destroy();
 	virtual void onDestroy() {};

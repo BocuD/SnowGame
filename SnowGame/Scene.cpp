@@ -127,24 +127,25 @@ Scene::~Scene()
 	}
 }
 
-void Scene::update()
+void Scene::update(float dt)
 {
+	//run physics at full framerate for smoother animations
+	for (auto& rb : rigidBodies)
+	{
+		rb->physicsTick(colliders, rigidBodies, dt);
+	}
+
 	//update entities
 	size_t entityCount = entities.size();
 	for (int i = 0; i < entityCount; i++)
 	{
-		entities[i]->update();
+		entities[i]->update(dt);
 	}
 
-	//run collision detection
+	//handle object deletion
 	for (auto& rb : rigidBodies)
 	{
-		rb->physicsTick(colliders, rigidBodies, 1/60.f);
-	}
-
-	for (auto& rb : rigidBodies)
-	{
-		if(rb->destroyed)
+		if (rb->destroyed)
 		{
 			removeRigidBody(rb);
 		}
@@ -152,7 +153,7 @@ void Scene::update()
 
 	for (auto& entity : entities)
 	{
-		if(entity->destroyed)
+		if (entity->destroyed)
 		{
 			entity->onDestroy();
 			delete entity;
@@ -164,7 +165,14 @@ void Scene::update()
 	{
 		destroy();
 		Game::removeScene(this);
+	}
+}
 
+void Scene::fixedUpdate()
+{
+	for (auto& entity : entities)
+	{
+		entity->fixedUpdate();
 	}
 }
 

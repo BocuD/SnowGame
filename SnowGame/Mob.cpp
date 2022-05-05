@@ -17,11 +17,6 @@ void Mob::init()
 	colliderSize = { 17, 13 };
 }
 
-void Mob::update()
-{
-	RigidBody::update();
-}
-
 void Mob::onCollisionEnter(RigidBody* other)
 {
 	if(other->name == "Snowball")

@@ -15,7 +15,7 @@ void Snowball::init()
 	colliderOffset = { 0, 4.5f };
 }
 
-void Snowball::update()
+void Snowball::fixedUpdate()
 {
 	velocity.y *= 0.93f;
 	velocity.y += 14;
@@ -26,7 +26,7 @@ void Snowball::update()
 		rotate(velocity.x * 0.3f);
 	}
 
-	RigidBody::update();
+	RigidBody::fixedUpdate();
 
 	num--;
 	if (num == 0) destroy();

@@ -28,10 +28,10 @@ public:
 	sf::FloatRect sceneRect;
 	bool destroyed = false;
 
-	void update();
+	void update(float dt);
+	void fixedUpdate();
 	void draw(sf::RenderWindow* window);
 
-	GameObject* createEntity(std::string name, sf::Vector2<float> position);
 	template <class T>
 	T* createEntity(std::string name, sf::Vector2<float> position);
 

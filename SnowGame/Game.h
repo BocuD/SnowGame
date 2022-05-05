@@ -10,7 +10,8 @@ class Game
 {
 public:
 	void init();
-	void update();
+	void update(float dt);
+	void fixedUpdate();
 	void draw(sf::RenderWindow* window);
 	void eventHandler(const sf::Event e);
 

@@ -93,13 +93,22 @@ void Game::init()
     loadBGTextures();
 }
 
-void Game::update()
+void Game::update(float dt)
 {
     //update the scene
 	for (auto scene : scenes)
 	{
-        scene->update();
+        scene->update(dt);
 	}
+}
+
+void Game::fixedUpdate() 
+{
+    //run fixedUpdate in all scenes
+    for (auto scene : scenes)
+    {
+        scene->fixedUpdate();
+    }
 }
 
 void Game::addScene(Scene* newScene)
