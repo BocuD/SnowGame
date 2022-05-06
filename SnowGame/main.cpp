@@ -37,8 +37,9 @@ int main(char* args)
                 window.clear();
                 window.close();
                 return 0;
+
             default:
-                game->eventHandler(e);
+                game->eventHandler(e, &window);
                 break;
             }
         }

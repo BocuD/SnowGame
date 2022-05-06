@@ -12,6 +12,8 @@ public:
 	void physicsTick(std::vector<Collider*> colliders, std::vector<RigidBody*> rigidBodies, float dt);
 	void updateColliderRect();
 
+	int ignorePhysics = 0;
+
 	sf::Vector2f velocity;
 
 	sf::Vector2f colliderSize;

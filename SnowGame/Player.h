@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include <LDtkLoader/Entity.hpp>
-#include "AnimatedGameObject.h"
+
 #include "RigidBody.h"
 
 class Player : public RigidBody

@@ -7,7 +7,6 @@
 #include "Game.h";
 #include "Hud.h"
 #include "LoadTrigger.h"
-#include "Mob.h"
 #include "Scene.h"
 #include "Snowball.h"
 #include "TextureManager.h"
@@ -40,84 +39,92 @@ void Player::update(float dt)
 {
 	if (grounded) jumpCount = 3;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) 
-	{
-		if(onLadder > 0)
+	if (Game::hasFocus) {
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
 		{
-			velocity.y = -100;
-		}
-		//only jump if we're not on a ladder
-		else if (!upWasPressed && jumpCount > 0) 
-		{
-			velocity.y = -300;
-			upWasPressed = true;
-			grounded = false;
-			jumpCount--;
-
-			delayFrames = 4;
-			setTextureId(2);
-			disableStateMachine = 8 * 4;
-		}
-	}
-	else upWasPressed = false;
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-	{
-		spaceWasPressed = true;
-	}
-	else
-	{
-		if(spaceWasPressed)
-		{
-			auto snowball = new Snowball();
-			snowball->name = "Snowball";
-			snowball->setPosition(getPosition());
-
-			snowball->velocity.y = -100;
-
-			if (velocity.x > 0)
+			if (onLadder > 0)
 			{
-				snowball->velocity.x = velocity.x + 100;
-				snowball->move(7, -20);
+				velocity.y = -100;
 			}
-			else
+			//only jump if we're not on a ladder
+			else if (!upWasPressed && jumpCount > 0)
 			{
-				snowball->velocity.x = velocity.x - 100;
-				snowball->move(-7, -20);
+				velocity.y = -300;
+				upWasPressed = true;
+				grounded = false;
+				jumpCount--;
+
+				delayFrames = 4;
+				setTextureId(2);
+				disableStateMachine = 8 * 4;
 			}
-
-			scene->addEntity(snowball);
-			scene->addRigidBody(snowball);
-
-			spaceWasPressed = false;
 		}
-	}
+		else upWasPressed = false;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
-	{
-		if (!shiftWasPressed && grounded)
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
 		{
-			shiftWasPressed = true;
-			velocity.x *= 4;
-			disableStateMachine = 1 * 16;
-			delayFrames = 1;
-			setTextureId(3);
+			spaceWasPressed = true;
 		}
+		else
+		{
+			if (spaceWasPressed)
+			{
+				auto snowball = new Snowball();
+				snowball->name = "Snowball";
+				snowball->setPosition(getPosition());
+
+				snowball->velocity.y = -100;
+
+				if (velocity.x > 0)
+				{
+					snowball->velocity.x = velocity.x + 100;
+					snowball->move(7, -20);
+				}
+				else
+				{
+					snowball->velocity.x = velocity.x - 100;
+					snowball->move(-7, -20);
+				}
+
+				scene->addEntity(snowball);
+				scene->addRigidBody(snowball);
+
+				spaceWasPressed = false;
+			}
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
+		{
+			if (!shiftWasPressed && grounded)
+			{
+				shiftWasPressed = true;
+				velocity.x *= 4;
+				disableStateMachine = 1 * 16;
+				delayFrames = 1;
+				setTextureId(3);
+			}
+		}
+		else shiftWasPressed = false;
 	}
-	else shiftWasPressed = false;
 
 	RigidBody::update(dt);
+
+	std::cout << "pos: " << getPosition().x << " " << getPosition().y << std::endl;
 }
 
 void Player::fixedUpdate()
 {
 	moving = false;
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+	if (Game::hasFocus) 
 	{
-		velocity.x -= 40;
-		moving = true;
-		setScale(-0.15f, 0.15f);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+		{
+			velocity.x -= 40;
+			moving = true;
+			setScale(-0.15f, 0.15f);
+		}
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
@@ -211,6 +218,11 @@ void Player::onCollisionEnter(RigidBody* other)
 		((Coin*)other)->pickup();
 		Hud::incCoinCount();
 	}
+	else if (other->name == "Gem")
+	{
+		((Gem*)other)->pickup();
+		Hud::setGemCollected(((Gem*)other)->index);
+	}
 }
 
 void Player::onTriggerEnter(Collider* other)
@@ -225,11 +237,15 @@ void Player::onTriggerEnter(Collider* other)
 
 		LoadTrigger* trigger = (LoadTrigger*)other;
 		Scene* currentScene = scene;
+		float healthTemp = health;
 
-		Game::loadScene(trigger->levelName, [trigger, currentScene](Scene* newScene)
+		Game::loadScene(trigger->levelName, [trigger, currentScene, healthTemp](Scene* newScene)
 		{
 			Game::setActiveScene(newScene);
 			newScene->player->setPosition(trigger->spawnPos);
+			std::cout << trigger->spawnPos.x << " end me " << trigger->spawnPos.y << std::endl;
+			newScene->player->ignorePhysics = 5;
+			newScene->player->health = healthTemp;
 			currentScene->destroy();
 		});
 	}

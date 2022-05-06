@@ -19,9 +19,9 @@ Hud hud;
 
 sf::Texture t0, t1, t2, t3, t4, t5;
 
-sf::View* sceneView;
-sf::View* backgroundView;
-sf::View* hudView;
+sf::View* Game::sceneView;
+sf::View* Game::backgroundView;
+sf::View* Game::hudView;
 
 void handleInput(const sf::Event::KeyEvent& key);
 
@@ -49,7 +49,7 @@ void loadBGTextures()
     background.sprites[5].setTexture(t5);
 }
 
-void resetViews()
+void Game::resetViews()
 {
     sf::FloatRect sceneRect = activeScene->sceneRect;
 
@@ -76,8 +76,7 @@ void resetViews()
 
 void Game::init()
 {
-    //force cache some textures
-    TextureManager::getTexture("Assets/Sprites/Slimes/slimegreen.png");
+    hasFocus = true;
 
 	project = new ldtk::Project;
     project->loadFromFile("Assets/world.ldtk");
@@ -174,6 +173,8 @@ ldtk::Project* Game::getProject()
     return project;
 }
 
+bool Game::hasFocus;
+
 void Game::draw(sf::RenderWindow* window)
 {
     //center view to player after running update()
@@ -197,7 +198,6 @@ void Game::draw(sf::RenderWindow* window)
 
     window->setView(*backgroundView);
     window->draw(background);
-
     window->setView(*sceneView);
 
     //draw all scenes
@@ -213,7 +213,7 @@ void Game::draw(sf::RenderWindow* window)
     window->draw(hud);
 }
 
-void Game::eventHandler(const sf::Event e)
+void Game::eventHandler(const sf::Event e, sf::Window* window)
 {
     switch (e.type) {
     case sf::Event::EventType::Resized:
@@ -222,10 +222,17 @@ void Game::eventHandler(const sf::Event e)
         backgroundView->setSize({ (float)e.size.width, (float)e.size.height });
         resetViews();
         break;
+
     case sf::Event::EventType::GainedFocus:
+        hasFocus = true;
+        window->setFramerateLimit(0);
         break;
+
     case sf::Event::EventType::LostFocus:
+        hasFocus = false;
+        window->setFramerateLimit(30);
         break;
+
     case sf::Event::KeyPressed:
         handleInput(e.key);
         break;

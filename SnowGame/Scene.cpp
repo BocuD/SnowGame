@@ -75,6 +75,12 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 					auto c = createEntity<Coin>(entity.getName(), position);
 					addRigidBody(c);
 				}
+				else if (entity.getName() == "Gem")
+				{
+					auto c = createEntity<Gem>(entity.getName(), position);
+					c->index = entity.getField<int>("index").value();
+					addRigidBody(c);
+				}
 			}
 		}
 

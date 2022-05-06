@@ -12,6 +12,12 @@ using ::VectorUtilities;
 
 void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidBody*> rigidBodies, float dt)
 {
+	if(ignorePhysics > 0)
+	{
+		ignorePhysics--;
+		return;
+	}
+
 	//save temp position
 	lastPosition = getPosition();
 
@@ -103,13 +109,12 @@ void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidB
 	}
 
 	//calculate actual velocity
-	//sf::Vector2f actualVelocity
-	velocity = (getPosition() - lastPosition) / dt;
+	sf::Vector2f actualVelocity = (getPosition() - lastPosition) / dt;
 
-	//if(VectorUtilities::vectorLength(actualVelocity) < VectorUtilities::vectorLength(velocity))
-	//{
-	//	  velocity = actualVelocity;
-	//}
+	if(VectorUtilities::vectorLength(actualVelocity) < VectorUtilities::vectorLength(velocity))
+	{
+		  velocity = actualVelocity;
+	}
 }
 
 void RigidBody::updateColliderRect()
