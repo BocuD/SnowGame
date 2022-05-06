@@ -54,7 +54,7 @@ void Game::resetViews()
     sf::FloatRect sceneRect = activeScene->sceneRect;
 
     sceneView->zoom(720 / sceneView->getSize().y * 0.3f);
-    hudView->zoom(720 / hudView->getSize().y);
+    hudView->zoom(720 / hudView->getSize().y * 0.8f);
     backgroundView->zoom(720 / backgroundView->getSize().y);
 
     hudView->setCenter(hudView->getSize().x / 2, hudView->getSize().y / 2);

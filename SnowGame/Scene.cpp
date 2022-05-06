@@ -63,6 +63,7 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 				if (entity.getName() == "Player")
 				{
 					player = createEntity<Player>(entity.getName(), position);
+					player->ignorePhysics = 5;
 					addRigidBody(player);
 				}
 				else if (entity.getName() == "Mob")
