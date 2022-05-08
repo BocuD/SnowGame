@@ -109,8 +109,6 @@ void Player::update(float dt)
 	}
 
 	RigidBody::update(dt);
-
-	std::cout << "pos: " << getPosition().x << " " << getPosition().y << std::endl;
 }
 
 void Player::fixedUpdate()
@@ -243,7 +241,6 @@ void Player::onTriggerEnter(Collider* other)
 		{
 			Game::setActiveScene(newScene);
 			newScene->player->setPosition(trigger->spawnPos);
-			std::cout << trigger->spawnPos.x << " end me " << trigger->spawnPos.y << std::endl;
 			newScene->player->ignorePhysics = 5;
 			newScene->player->health = healthTemp;
 			currentScene->destroy();

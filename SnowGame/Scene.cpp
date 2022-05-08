@@ -69,6 +69,14 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 				else if (entity.getName() == "Mob")
 				{
 					auto m = createEntity<Mob>(entity.getName(), position);
+					auto patrolPoints = entity.getArrayField<ldtk::IntPoint>("Patrol");
+
+					m->patrolPoints = new sf::Vector2f[patrolPoints.size()];
+					for (size_t i = 0; i < patrolPoints.size(); i++)
+					{
+						m->patrolPoints[i] = { (float)patrolPoints[i].value().x * 16, (float)patrolPoints[i].value().y * 16 };
+					}
+					
 					addRigidBody(m);
 				}
 				else if (entity.getName() == "Coin")

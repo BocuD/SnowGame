@@ -3,6 +3,7 @@
 #include <SFML/Graphics/Texture.hpp>
 
 #include "TextureManager.h"
+#include "VectorUtilities.h"
 
 void Mob::init()
 {
@@ -15,6 +16,16 @@ void Mob::init()
 	animate = true;
 
 	colliderSize = { 17, 13 };
+}
+
+void Mob::update(float dt)
+{
+	if(VectorUtilities::vectorLength(velocity) < 1)
+	{
+		targetVelocity *= -1;
+		velocity.x = targetVelocity;
+	}
+	RigidBody::update(dt);
 }
 
 void Mob::onCollisionEnter(RigidBody* other)
