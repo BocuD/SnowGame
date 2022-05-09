@@ -15,4 +15,14 @@ public:
 	{
 		return sqrt(input.x * input.x + input.y * input.y);
 	}
+
+	static float distance(const sf::Vector2f A, const sf::Vector2f B)
+	{
+		return vectorLength(A - B);
+	}
+
+	static sf::Vector2f lerp(const sf::Vector2f A, const sf::Vector2f B, const float t)
+	{
+		return B * t + A * (1.f - t);
+	}
 };
