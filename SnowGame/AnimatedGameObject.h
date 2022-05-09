@@ -9,7 +9,7 @@ public:
 	std::vector<int> frameCount;
 	sf::Vector2i textureSize;
 
-	bool animate = true;
+	bool animate = false;
 	int currentFrame = 0;
 	int delayStep = 0;
 	int delayFrames = 4;

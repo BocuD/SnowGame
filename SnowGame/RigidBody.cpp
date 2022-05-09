@@ -30,13 +30,11 @@ void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidB
 	//handle collisions
 	for (auto col : colliders)
 	{
-		sf::FloatRect intersect;
-
 		if (col->isTrigger) //handle trigger events
 		{
 			const bool wasInTrigger = std::find(intersectingTriggers.begin(), intersectingTriggers.end(), col) != intersectingTriggers.end();
 
-			if (colliderRect.intersects(col->bounds, intersect))
+			if (colliderRect.findIntersection(col->bounds))
 			{
 				if (!wasInTrigger)
 				{
@@ -55,28 +53,29 @@ void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidB
 		}
 		else //resolve collisions
 		{
-			if (colliderRect.intersects(col->bounds, intersect))
+			if (auto intersect = colliderRect.findIntersection(col->bounds))
 			{
-				if (intersect.width < intersect.height)
+				sf::FloatRect rect = intersect.value();
+				if (rect.width < rect.height)
 				{
 					//handle wall collisions
-					if (colliderRect.left < intersect.left)
-						move(-intersect.width, 0);
+					if (colliderRect.left < rect.left)
+						move({ -rect.width, 0 });
 					else
-						move(intersect.width, 0);
+						move({rect.width, 0});
 				}
 				else
 				{
 					//touching the floor, we need to move up: we're grounded
-					if (colliderRect.top < intersect.top)
+					if (colliderRect.top < rect.top)
 					{
-						move(0, -intersect.height);
+						move({ 0, -rect.height });
 						grounded = true;
 					}
 					//touching the ceiling, we need to move downwards
 					else
 					{
-						move(0, intersect.height);
+						move({0, rect.height});
 					}
 				}
 			}
@@ -87,10 +86,9 @@ void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidB
 	{
 		if (rb == this) continue;
 
-		sf::FloatRect intersect;
 		const bool wasColliding = std::find(intersectingBodies.begin(), intersectingBodies.end(), rb) != intersectingBodies.end();
 
-		if(colliderRect.intersects(rb->colliderRect, intersect))
+		if(auto intersect = colliderRect.findIntersection(rb->colliderRect))
 		{
 			if (!wasColliding) 
 			{
@@ -120,5 +118,5 @@ void RigidBody::physicsTick(std::vector<Collider*> colliders, std::vector<RigidB
 void RigidBody::updateColliderRect()
 {
 	const sf::Vector2f position = getPosition() + colliderOffset;
-	colliderRect = { position.x - colliderSize.x / 2, position.y - colliderSize.y, colliderSize.x, colliderSize.y };
+	colliderRect = { {position.x - colliderSize.x / 2, position.y - colliderSize.y}, { colliderSize.x, colliderSize.y } };
 }

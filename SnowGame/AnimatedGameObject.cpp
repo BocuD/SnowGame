@@ -37,7 +37,7 @@ void AnimatedGameObject::setTextureId(int id)
 
 void AnimatedGameObject::setAnimationFrame(int frame)
 {
-	setTextureRect(sf::IntRect(frame * textureSize.x, 0, textureSize.x, textureSize.y));
+	setTextureRect(sf::IntRect({ frame * textureSize.x, 0 }, { textureSize.x, textureSize.y }));
 }
 
 void AnimatedGameObject::fixedUpdate()

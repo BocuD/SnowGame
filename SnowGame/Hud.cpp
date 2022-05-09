@@ -21,28 +21,28 @@ void Hud::init()
 	heartTexture[1].loadFromFile("Assets/Sprites/Hearts/animated/border/heart_animated_2.png");
 
 	coin.setTexture(*TextureManager::getTexture("Assets/Coin_Gems/MonedaD.png"));
-	coin.setTextureRect({ 0, 0, 16, 16 });
-	coin.setPosition(11, 50);
-	coin.setScale(2, 2);
+	coin.setTextureRect({ { 0, 0 }, {16, 16} });
+	coin.setPosition({ 11, 50 });
+	coin.setScale({ 2, 2 });
 
 	coinText.setFont(Fonts::mainFont);
 	coinText.setString("x 0");
-	coinText.setPosition(48, 61);
-	coinText.setScale(0.6f, 0.6f);
+	coinText.setPosition({ 48, 61 });
+	coinText.setScale({0.6f, 0.6f});
 
 	coinTextBG.setFont(Fonts::mainFont);
 	coinTextBG.setString("x 0");
-	coinTextBG.setPosition(50, 63);
-	coinTextBG.setScale(0.6f, 0.6f);
+	coinTextBG.setPosition({ 50, 63 });
+	coinTextBG.setScale({ 0.6f, 0.6f });
 
 	coinTextBG.setFillColor(sf::Color::Black);
 
 	for (int i = 0; i < 5; i++)
 	{
 		hearts[i].setTexture(heartTexture[0]);
-		hearts[i].setScale(2, 2);
-		hearts[i].setPosition(10 + i * 40, 10);
-		hearts[i].setTextureRect({ 0, 0, 17, 17 });
+		hearts[i].setScale({ 2, 2 });
+		hearts[i].setPosition({ 10 + (float)i * 40, 10 });
+		hearts[i].setTextureRect({ { 0, 0 }, {17, 17} });
 		hearts[i].setColor(sf::Color::Transparent);
 	}
 
@@ -51,10 +51,10 @@ void Hud::init()
 	for (int i = 0; i < 3; i++)
 	{
 		gem[i].setTexture(*gemTex);
-		gem[i].setScale(2, 2);
+		gem[i].setScale({ 2, 2 });
 		gem[i].setColor({ 255, 255, 255, 100 });
-		gem[i].setTextureRect({ 0, 0, 16, 16 });
-		gem[i].setPosition(90 + i * 27, 49);
+		gem[i].setTextureRect({{ 0, 0 }, { 16, 16}});
+		gem[i].setPosition({ 90 + (float)i * 27, 49 });
 	}
 }
 
@@ -109,16 +109,7 @@ void Hud::setGemCollected(int i)
 	gem[i].setColor(sf::Color::White);
 }
 
-const int heartLeft[] = { 17, 0, 68, 51, 34 };
-void Hud::updateHeartSprite(int heart, int step, bool moveDown)
-{
-	if (step == 2) hearts[heart].setColor(sf::Color::White);
-	if (step == 1 && moveDown) hearts[heart].setColor(sf::Color::Transparent);
-
-	hearts[heart].setTextureRect({ heartLeft[step], 0, 17, 17 });
-}
-
-void Hud::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void Hud::draw(sf::RenderTarget& target, const sf::RenderStates& states) const
 {
 	for (int i = 0; i < 5; i++)
 	{
@@ -133,4 +124,13 @@ void Hud::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(coin);
 	target.draw(coinTextBG);
 	target.draw(coinText);
+}
+
+const int heartLeft[] = { 17, 0, 68, 51, 34 };
+void Hud::updateHeartSprite(int heart, int step, bool moveDown)
+{
+	if (step == 2) hearts[heart].setColor(sf::Color::White);
+	if (step == 1 && moveDown) hearts[heart].setColor(sf::Color::Transparent);
+
+	hearts[heart].setTextureRect({ {heartLeft[step], 0}, {17, 17 } });
 }

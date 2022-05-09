@@ -10,7 +10,8 @@ public:
 	void update();
 	static void incCoinCount();
 	static void setGemCollected(int i);
-	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+	void draw(sf::RenderTarget& target, const sf::RenderStates& states) const override;
 
 	int health = 0;
 };
