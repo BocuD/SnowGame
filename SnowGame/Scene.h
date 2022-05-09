@@ -4,7 +4,6 @@
 
 #include "Collider.h"
 #include "GameObject.h"
-#include "Player.h"
 #include "RigidBody.h"
 #include "LDtkLoader/Project.hpp"
 #include "TileMap.h"
@@ -23,7 +22,7 @@ public:
 	std::vector<TileMap*> tilemaps;
 	std::vector<Collider*> colliders;
 
-	Player* player;
+	GameObject* player;
 
 	sf::FloatRect sceneRect;
 	bool destroyed = false;
@@ -33,11 +32,14 @@ public:
 	void draw(sf::RenderWindow* window);
 
 	template <class T>
-	T* createEntity(std::string name, sf::Vector2<float> position);
+	T* createEntity(const ldtk::Entity& entity);
 
 	void addRigidBody(RigidBody* rb);
 	void addEntity(GameObject* entity);
 	void removeRigidBody(RigidBody* rb);
 	void removeEntity(GameObject* entity);
 	void destroy();
+
+	//scene properties
+	bool disableHud = false;
 };
