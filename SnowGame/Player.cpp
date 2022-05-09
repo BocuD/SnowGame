@@ -12,8 +12,6 @@
 #include "TextureManager.h"
 #include "VectorUtilities.h"
 
-sf::Texture snowballTex;
-
 void Player::init()
 {
 	textureSize = { 512, 512 };
@@ -27,8 +25,6 @@ void Player::init()
 
 	colliderSize = { 20, 35 };
 	animate = true;
-
-	snowballTex.loadFromFile("Assets/Sprites/snowball.png");
 
 	health = maxHealth;
 

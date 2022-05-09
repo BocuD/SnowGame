@@ -93,7 +93,8 @@ void Game::init()
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_2.png");
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_1.png");
 
-    background.offset.y = -250;
+    background.offset.x = -1000;
+    background.offset.y = -500;
 }
 
 void Game::update(float dt)
@@ -170,7 +171,7 @@ void Game::startGame()
 
     Scene* menuScene = getActiveScene();
 
-    loadScene("World_Level_0", [](Scene* newScene)
+    loadScene("World_Level_1", [](Scene* newScene)
     {
         setActiveScene(newScene);
     });
@@ -243,6 +244,13 @@ void Game::eventHandler(const sf::Event e, sf::Window* window)
         break;
 
     case sf::Event::KeyPressed:
+        if (e.key.code == sf::Keyboard::Key::C)
+        {
+	        for (auto& element : scenes)
+	        {
+                element->drawColliders = !element->drawColliders;
+	        }
+        }
         menu->handleInput(e.key);
         break;
     }

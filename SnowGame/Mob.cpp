@@ -18,12 +18,14 @@ void Mob::init()
 
 void Mob::update(float dt)
 {
-
-	if(VectorUtilities::vectorLength(velocity) < 1)
+	if (VectorUtilities::distance(getPosition(), patrolPoints[currentPoint]) < 20)
 	{
-		targetVelocity *= -1;
-		velocity.x = targetVelocity;
+		if (currentPoint == 1) currentPoint = 0;
+		else currentPoint = 1;
+
+		velocity.x = -VectorUtilities::normalizeVector(getPosition() - patrolPoints[currentPoint]).x * targetVelocity;
 	}
+	
 	RigidBody::update(dt);
 }
 
@@ -42,8 +44,14 @@ void Mob::loadEntityData(const ldtk::Entity& entity)
 	patrolPoints = new sf::Vector2f[pointsField.size()];
 	for (size_t i = 0; i < pointsField.size(); i++)
 	{
-		patrolPoints[i] = { (float)pointsField[i].value().x * 16, (float)pointsField[i].value().y * 16 };
+		patrolPoints[i] = {16 * (float)pointsField[i].value().x, 16 * (float)pointsField[i].value().y };
 	}
 
+	if (patrolPoints->length() > 0)
+	{
+		patrol = true;
+		velocity.x = -VectorUtilities::normalizeVector(getPosition() - patrolPoints[currentPoint]).x * targetVelocity;
+	}
 	RigidBody::loadEntityData(entity);
+
 }

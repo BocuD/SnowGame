@@ -11,6 +11,7 @@ void Coin::init()
 	setTextureId(0);
 	setOrigin({ 8, 3 });
 	colliderSize = { 12, 12 };
+	colliderOffset = { 0, 9 };
 	animate = true;
 
 	AnimatedGameObject::init();
@@ -46,6 +47,7 @@ void Gem::init()
 	setTextureId(0);
 	setOrigin({ 8, 3 });
 	colliderSize = { 12, 12 };
+	colliderOffset = { 0, 9 };
 	animate = true;
 
 	AnimatedGameObject::init();

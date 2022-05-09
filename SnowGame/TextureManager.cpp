@@ -28,7 +28,22 @@ sf::Texture* TextureManager::getTexture(std::string filepath)
 sf::Texture* TextureManager::addTexture(std::string filepath)
 {
 	sf::Texture newTexture;
-	newTexture.loadFromFile(filepath);
-	textureCache[filepath] = newTexture;
+
+	if(!newTexture.loadFromFile(filepath))
+	{
+		std::cout << "Failed to load texture " << filepath << std::endl;
+		sf::Texture errorTex;
+
+		if (errorTex.create(16, 16))
+		{
+			textureCache[filepath] = errorTex;
+		}
+		else throw std::exception("Couldn't create fallback texture, we are probably out of memory");
+	}
+	else
+	{
+		textureCache[filepath] = newTexture;
+	}
+
 	return &textureCache[filepath];
 }

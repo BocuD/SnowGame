@@ -1,11 +1,11 @@
 ﻿#include "AnimatedGameObject.h"
 #include <SFML/Graphics/Texture.hpp>
 
+#include "TextureManager.h"
+
 void AnimatedGameObject::addTexture(std::string path, int frames)
 {
-	sf::Texture tex;
-	tex.loadFromFile(path);
-	textures.push_back(tex);
+	textures.push_back(*TextureManager::getTexture(path));
 	frameCount.push_back(frames);
 
 	if (!hasTexture) 

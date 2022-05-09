@@ -248,7 +248,6 @@ T* Scene::createEntity(const ldtk::Entity& entity)
 
 void Scene::addRigidBody(RigidBody* rb)
 {
-	std::cout << "adding rigidbody to scene: " << rb << std::endl;
 	rigidBodies.push_back(rb);
 }
 
@@ -262,7 +261,6 @@ void Scene::addEntity(GameObject* entity)
 
 void Scene::removeRigidBody(RigidBody* rb)
 {
-	std::cout << "removing rigidbody from scene: " << rb << std::endl;
 	rigidBodies.erase(std::remove(rigidBodies.begin(), rigidBodies.end(), rb), rigidBodies.end());
 }
 

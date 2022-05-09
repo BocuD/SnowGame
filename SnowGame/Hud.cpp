@@ -7,8 +7,6 @@
 #include "Fonts.h"
 #include "TextureManager.h"
 
-sf::Texture heartTexture[2];
-
 sf::Sprite coin;
 sf::Text coinText;
 sf::Text coinTextBG;
@@ -17,9 +15,6 @@ sf::Sprite gem[3];
 
 void Hud::init()
 {
-	heartTexture[0].loadFromFile("Assets/Sprites/Hearts/animated/border/heart_animated_1.png");
-	heartTexture[1].loadFromFile("Assets/Sprites/Hearts/animated/border/heart_animated_2.png");
-
 	coin.setTexture(*TextureManager::getTexture("Assets/Coin_Gems/MonedaD.png"));
 	coin.setTextureRect({ { 0, 0 }, {16, 16} });
 	coin.setPosition({ 11, 50 });
@@ -37,9 +32,11 @@ void Hud::init()
 
 	coinTextBG.setFillColor(sf::Color::Black);
 
+	sf::Texture* heartTexture = TextureManager::getTexture("Assets/Sprites/Hearts/animated/border/heart_animated_1.png");
+
 	for (int i = 0; i < 5; i++)
 	{
-		hearts[i].setTexture(heartTexture[0]);
+		hearts[i].setTexture(*heartTexture);
 		hearts[i].setScale({ 2, 2 });
 		hearts[i].setPosition({ 10 + (float)i * 40, 10 });
 		hearts[i].setTextureRect({ { 0, 0 }, {17, 17} });
