@@ -60,6 +60,12 @@
     <ClCompile Include="Coin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DemoCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\SFML\bin\openal32.dll">
@@ -136,9 +142,6 @@
     <ClInclude Include="VectorUtilities.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LoadTrigger.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -146,6 +149,15 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Coin.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoCamera.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
