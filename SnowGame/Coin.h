@@ -18,4 +18,5 @@ class Gem : public Coin
 public:
 	int index = 0;
 	void init() override;
+	void loadEntityData(const ldtk::Entity& entity) override;
 };

@@ -4,7 +4,7 @@
 #include <SFML/Window/Keyboard.hpp>
 
 #include "Coin.h"
-#include "Game.h";
+#include "Game.h"
 #include "Hud.h"
 #include "LoadTrigger.h"
 #include "Scene.h"
@@ -16,9 +16,9 @@ sf::Texture snowballTex;
 
 void Player::init()
 {
-	textureSize = { 512, 512 }; 
-	setOrigin(255, 390);
-	setScale(0.15f, 0.15f);
+	textureSize = { 512, 512 };
+	setOrigin({ 255, 390 });
+	setScale({0.15f, 0.15f});
 	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/idle.png"), 20);
 	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/walk.png"), 20);
 	addTexture(TextureManager::getTexture("Assets/Sprites/BlueWizard/jump.png"), 8);
@@ -31,6 +31,8 @@ void Player::init()
 	snowballTex.loadFromFile("Assets/Sprites/snowball.png");
 
 	health = maxHealth;
+
+	ignorePhysics = 2;
 
 	invincibilityFrames = 50;
 }
@@ -79,12 +81,12 @@ void Player::update(float dt)
 				if (velocity.x > 0)
 				{
 					snowball->velocity.x = velocity.x + 100;
-					snowball->move(7, -20);
+					snowball->move({ 7, -20 });
 				}
 				else
 				{
 					snowball->velocity.x = velocity.x - 100;
-					snowball->move(-7, -20);
+					snowball->move({-7, -20});
 				}
 
 				scene->addEntity(snowball);
@@ -121,7 +123,7 @@ void Player::fixedUpdate()
 		{
 			velocity.x -= 40;
 			moving = true;
-			setScale(-0.15f, 0.15f);
+			setScale({ -0.15f, 0.15f });
 		}
 	}
 
@@ -129,7 +131,7 @@ void Player::fixedUpdate()
 	{
 		velocity.x += 40;
 		moving = true;
-		setScale(0.15f, 0.15f);
+		setScale({0.15f, 0.15f});
 	}
 
 	if (invincibilityFrames > 0)
@@ -233,16 +235,15 @@ void Player::onTriggerEnter(Collider* other)
 	{
 		if (invincibilityFrames > 0) return;
 
-		LoadTrigger* trigger = (LoadTrigger*)other;
+		auto trigger = (LoadTrigger*)other;
 		Scene* currentScene = scene;
-		float healthTemp = health;
+		int healthTemp = health;
 
 		Game::loadScene(trigger->levelName, [trigger, currentScene, healthTemp](Scene* newScene)
 		{
 			Game::setActiveScene(newScene);
 			newScene->player->setPosition(trigger->spawnPos);
-			newScene->player->ignorePhysics = 5;
-			newScene->player->health = healthTemp;
+			((Player*)newScene->player)->health = healthTemp;
 			currentScene->destroy();
 		});
 	}

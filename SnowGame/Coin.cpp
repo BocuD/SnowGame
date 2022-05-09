@@ -9,7 +9,7 @@ void Coin::init()
 	delayFrames = 5;
 	addTexture(TextureManager::getTexture("Assets/Coin_Gems/MonedaD.png"), 5);
 	setTextureId(0);
-	setOrigin(8, 3);
+	setOrigin({ 8, 3 });
 	colliderSize = { 12, 12 };
 	animate = true;
 
@@ -23,7 +23,7 @@ void Coin::fixedUpdate()
 		uint8_t a = pickupFrame * 25;
 		setColor({ 255, 255, 255, a });
 		pickupFrame--;
-		move(0, -0.6f);
+		move({ 0, -0.6f });
 		if(pickupFrame == 0)
 		{
 			destroy();
@@ -44,9 +44,16 @@ void Gem::init()
 	delayFrames = 8;
 	addTexture(TextureManager::getTexture("Assets/Coin_Gems/spr_coin_strip4.png"), 4);
 	setTextureId(0);
-	setOrigin(8, 3);
+	setOrigin({ 8, 3 });
 	colliderSize = { 12, 12 };
 	animate = true;
 
 	AnimatedGameObject::init();
+}
+
+void Gem::loadEntityData(const ldtk::Entity& entity)
+{
+	index = entity.getField<int>("index").value();
+
+	Coin::loadEntityData(entity);
 }

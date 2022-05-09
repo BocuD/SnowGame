@@ -5,7 +5,7 @@
 void Snowball::init()
 {
 	textureSize = { 16, 16 };
-	setOrigin(8, 8);
+	setOrigin({ 8, 8 });
 	delayFrames = 3;
 	addTexture(TextureManager::getTexture("Assets/Sprites/snowball.png"), 1);
 	setTextureId(0);
@@ -23,7 +23,7 @@ void Snowball::fixedUpdate()
 	if (grounded)
 	{
 		velocity.x *= 0.92f;
-		rotate(velocity.x * 0.3f);
+		rotate(sf::degrees(velocity.x * 0.3f));
 	}
 
 	RigidBody::fixedUpdate();
