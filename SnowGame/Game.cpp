@@ -7,47 +7,24 @@
 
 #include "Fonts.h"
 #include "Hud.h"
+#include "Menu.h"
 #include "ParallaxBackground.h"
+#include "Player.h"
 #include "Scene.h"
 
 ldtk::Project* project;
-std::vector<Scene*> scenes;
-Scene* activeScene;
 
 ParallaxBackground background;
 Hud hud;
-
-sf::Texture t0, t1, t2, t3, t4, t5;
+Menu* menu;
 
 sf::View* Game::sceneView;
 sf::View* Game::backgroundView;
 sf::View* Game::hudView;
+sf::View* Game::menuView;
 
-void handleInput(const sf::Event::KeyEvent& key);
-
-void loadBGTextures()
-{
-    t0.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
-    t1.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png");
-    t2.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/glacial_mountains.png");
-    t3.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_3.png");
-    t4.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_2.png");
-    t5.loadFromFile("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_1.png");
-
-    t0.setRepeated(true);
-    t1.setRepeated(true);
-    t2.setRepeated(true);
-    t3.setRepeated(true);
-    t4.setRepeated(true);
-    t5.setRepeated(true);
-
-    background.sprites[0].setTexture(t0);
-    background.sprites[1].setTexture(t1);
-    background.sprites[2].setTexture(t2);
-    background.sprites[3].setTexture(t3);
-    background.sprites[4].setTexture(t4);
-    background.sprites[5].setTexture(t5);
-}
+std::vector<std::unique_ptr<Scene>> Game::scenes;
+Scene* Game::activeScene;
 
 void Game::resetViews()
 {
@@ -56,8 +33,10 @@ void Game::resetViews()
     sceneView->zoom(720 / sceneView->getSize().y * 0.3f);
     hudView->zoom(720 / hudView->getSize().y * 0.8f);
     backgroundView->zoom(720 / backgroundView->getSize().y);
-
-    hudView->setCenter(hudView->getSize().x / 2, hudView->getSize().y / 2);
+    menuView->zoom(720 / menuView->getSize().y);
+    
+    hudView->setCenter({ hudView->getSize().x / 2, hudView->getSize().y / 2 });
+    menuView->setCenter({ 0, 0 });
 
     if (sceneRect.height < sceneView->getSize().y)
     {
@@ -77,9 +56,12 @@ void Game::resetViews()
 void Game::init()
 {
     hasFocus = true;
-
+    
+    //load project
 	project = new ldtk::Project;
-    project->loadFromFile("Assets/world.ldtk");
+    project->loadFromFile("Assets/menu.ldtk");
+
+    std::cout << "Successfully loaded project file " << project->getFilePath() << std::endl;
 
     //force cache all tilemaps
     for (auto tileset : project->allTilesets())
@@ -87,21 +69,23 @@ void Game::init()
         TextureManager::getTexture("Assets/" + tileset.path);
     }
 
-    std::cout << "Successfully loaded project file " << project->getFilePath() << std::endl;
-
-    sceneView = new sf::View({ 0, 0, 1280, 720 });
-    hudView = new sf::View({ 0, 0, 1280, 720 });
-    backgroundView = new sf::View({ 0, 0, 1280, 720 });
-
-    Scene* scene = new Scene(project, "World_Level_0");
-    addScene(scene);
-
-    setActiveScene(scene);
-
-    hud.init();
+    sceneView = new sf::View({ { 0, 0}, {1280, 720 } });
+    hudView = new sf::View({ { 0, 0}, {1280, 720 } });
+    backgroundView = new sf::View({ { 0, 0}, {1280, 720 } });
+    menuView = new sf::View({ { 0, 0}, {1280, 720 } });
 
     Fonts::loadFonts();
 
+    auto scene = std::make_unique<Scene>(project, "World_Level_0");
+    scene->disableHud = true;
+    scenes.push_back(std::move(scene));
+	setActiveScene(scenes.back().get());
+
+    hud.init();
+
+    menu = new Menu();
+
+    //todo: turn these into an object in the scene
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png");
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/glacial_mountains.png");
@@ -110,14 +94,12 @@ void Game::init()
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_1.png");
 
     background.offset.y = -250;
-
-    loadBGTextures();
 }
 
 void Game::update(float dt)
 {
     //update the scene
-	for (auto scene : scenes)
+	for (auto& scene : scenes)
 	{
         scene->update(dt);
 	}
@@ -126,23 +108,82 @@ void Game::update(float dt)
 void Game::fixedUpdate() 
 {
     //run fixedUpdate in all scenes
-    for (auto scene : scenes)
+    for (auto& scene : scenes)
     {
         scene->fixedUpdate();
     }
 }
 
-void Game::addScene(Scene* newScene)
+void Game::draw(sf::RenderWindow* window)
 {
-    scenes.push_back(newScene);
+    //center view to player after running update()
+    if (activeScene->player != nullptr)
+        sceneView->setCenter(activeScene->player->getPosition());
+
+    sf::FloatRect sceneRect = activeScene->sceneRect;
+
+    sf::Vector2f center = sceneView->getCenter();
+    sf::Vector2f size = sceneView->getSize();
+
+    sf::FloatRect viewRect = { { center.x - size.x / 2, center.y - size.y / 2}, {size.x, size.y }};
+
+    if (viewRect.left < sceneRect.left) viewRect.left = sceneRect.left;
+    if (viewRect.left + viewRect.width > sceneRect.left + sceneRect.width) viewRect.left = sceneRect.left + sceneRect.width - viewRect.width;
+
+    if (viewRect.top < sceneRect.top) viewRect.top = sceneRect.top;
+    if (viewRect.top + viewRect.height > sceneRect.top + sceneRect.height) viewRect.top = sceneRect.top + sceneRect.height - viewRect.height;
+
+    sceneView->reset(viewRect);
+
+    background.update(-sceneView->getCenter() / 10.f);
+
+    window->setView(*backgroundView);
+    window->draw(background);
+    window->setView(*sceneView);
+
+    //draw all scenes
+    for (auto& scene : scenes)
+    {
+        scene->draw(window);
+    }
+
+    if (!activeScene->disableHud)
+    {
+        //draw hud
+        window->setView(*hudView);
+        hud.health = ((Player*)activeScene->player)->health;
+        hud.update();
+        window->draw(hud);
+    }
+    else
+    {
+        //draw menu
+        window->setView(*menuView);
+        menu->draw(window);
+    }
+}
+
+void Game::startGame()
+{
+    project = new ldtk::Project;
+    project->loadFromFile("Assets/world.ldtk");
+
+    Scene* menuScene = getActiveScene();
+
+    loadScene("World_Level_0", [](Scene* newScene)
+    {
+        setActiveScene(newScene);
+    });
+
+    removeScene(menuScene);
 }
 
 void Game::loadScene(std::string name, std::function<void(Scene* scene)> callback)
 {
-    Scene* scene = new Scene(Game::getProject(), name);
-    std::cout << "adding scene" << std::endl;
-    Game::addScene(scene);
-    callback(scene);
+    std::unique_ptr<Scene> newScene = std::make_unique<Scene>(Game::getProject(), name);
+    std::cout << "loaded scene" << std::endl;
+    scenes.push_back(std::move(newScene));
+    callback(scenes.back().get());
 }
 
 void Game::loadSceneAsync(std::string levelName, std::function<void(Scene* scene)> callback)
@@ -152,8 +193,14 @@ void Game::loadSceneAsync(std::string levelName, std::function<void(Scene* scene
 
 void Game::removeScene(Scene* scene)
 {
-    scenes.erase(std::remove(scenes.begin(), scenes.end(), scene), scenes.end());
-    delete scene;
+    for (size_t i = 0; i < scenes.size(); i++)
+    {
+	    if(scenes[i].get() == scene)
+	    {
+            scenes.erase(scenes.begin() + i);
+            return;
+	    }
+    }
 }
 
 Scene* Game::getActiveScene()
@@ -174,44 +221,6 @@ ldtk::Project* Game::getProject()
 }
 
 bool Game::hasFocus;
-
-void Game::draw(sf::RenderWindow* window)
-{
-    //center view to player after running update()
-    sceneView->setCenter(activeScene->player->getPosition());
-    sf::FloatRect sceneRect = activeScene->sceneRect;
-
-    sf::Vector2f center = sceneView->getCenter();
-    sf::Vector2f size = sceneView->getSize();
-
-    sf::FloatRect viewRect = { center.x - size.x / 2, center.y - size.y / 2, size.x, size.y };
-
-    if (viewRect.left < sceneRect.left) viewRect.left = sceneRect.left;
-    if (viewRect.left + viewRect.width > sceneRect.left + sceneRect.width) viewRect.left = sceneRect.left + sceneRect.width - viewRect.width;
-
-    if (viewRect.top < sceneRect.top) viewRect.top = sceneRect.top;
-    if (viewRect.top + viewRect.height > sceneRect.top + sceneRect.height) viewRect.top = sceneRect.top + sceneRect.height - viewRect.height;
-
-    sceneView->reset(viewRect);
-
-    background.update(-sceneView->getCenter() / 10.f);
-
-    window->setView(*backgroundView);
-    window->draw(background);
-    window->setView(*sceneView);
-
-    //draw all scenes
-    for (auto scene : scenes)
-    {
-        scene->draw(window);
-    }
-
-    //draw hud
-    window->setView(*hudView);
-    hud.health = activeScene->player->health;
-    hud.update();
-    window->draw(hud);
-}
 
 void Game::eventHandler(const sf::Event e, sf::Window* window)
 {
@@ -234,43 +243,7 @@ void Game::eventHandler(const sf::Event e, sf::Window* window)
         break;
 
     case sf::Event::KeyPressed:
-        handleInput(e.key);
+        menu->handleInput(e.key);
         break;
-    }
-}
-
-//can be used for gui navigation
-void handleInput(const sf::Event::KeyEvent& key)
-{
-    switch (key.code)
-    {
-    case sf::Keyboard::Up:
-    case sf::Keyboard::W:
-        break;
-    case sf::Keyboard::Down:
-    case sf::Keyboard::S:
-        break;
-    case sf::Keyboard::Left:
-    case sf::Keyboard::A:
-        break;
-    case sf::Keyboard::Right:
-    case sf::Keyboard::D:
-        break;
-
-    case sf::Keyboard::C:
-	    for (auto scene : scenes)
-	    {
-            scene->drawColliders = !scene->drawColliders;
-	    }
-        break;
-
-    case sf::Keyboard::Escape: break;
-    case sf::Keyboard::LControl: break;
-    case sf::Keyboard::LShift: break;
-    case sf::Keyboard::RControl: break;
-    case sf::Keyboard::RShift: break;
-    case sf::Keyboard::RAlt: break;
-    case sf::Keyboard::Space: break;
-    default: break;
     }
 }
