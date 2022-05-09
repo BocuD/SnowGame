@@ -3,19 +3,19 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-void ParallaxBackground::addLayer(std::string texturePath)
+#include "TextureManager.h"
+
+void ParallaxBackground::addLayer(const std::string texturePath)
 {
-	textures.emplace_back();
-	sf::Texture* texture = &textures.back();
-	texture->loadFromFile(texturePath);
+	sf::Texture* texture = TextureManager::getTexture(texturePath);
 	texture->setRepeated(true);
 
 	sprites.emplace_back();
 	sf::Sprite* sprite = &sprites.back();
 	sprite->setTexture(*texture);
-	sprite->setScale(5, 5);
+	sprite->setScale({ 5, 5 });
 	sf::IntRect rect = sprite->getTextureRect();
-	sprite->setTextureRect({ 0, 0, 2048, rect.height });
+	sprite->setTextureRect({{ 0, 0 }, { 2048, rect.height}});
 }
 
 void ParallaxBackground::update(const sf::Vector2f camPos)
@@ -26,9 +26,9 @@ void ParallaxBackground::update(const sf::Vector2f camPos)
 	}
 }
 
-void ParallaxBackground::draw(sf::RenderTarget& target, sf::RenderStates states) const
+void ParallaxBackground::draw(sf::RenderTarget& target, const sf::RenderStates& states) const
 {
-	for (sf::Sprite layer: sprites)
+	for (sf::Sprite layer : sprites)
 	{
 		target.draw(layer);
 	}
