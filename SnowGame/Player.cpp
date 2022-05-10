@@ -30,7 +30,7 @@ void Player::init()
 
 	ignorePhysics = 2;
 
-	invincibilityFrames = 50;
+	invincibilityFrames = 35;
 }
 
 void Player::update(float dt)
@@ -227,7 +227,7 @@ void Player::onTriggerEnter(Collider* other)
 	{
 		onLadder++;
 	}
-	else if(other->tag == "LoadTrigger")
+	else if (other->tag == "LoadTrigger")
 	{
 		if (invincibilityFrames > 0) return;
 
@@ -235,12 +235,33 @@ void Player::onTriggerEnter(Collider* other)
 		Scene* currentScene = scene;
 		int healthTemp = health;
 
+		//first try to loop through loaded scenes, and if the target scene is loaded, just set it as active
+		for (auto& s : Game::scenes)
+		{
+			if (s->name == trigger->levelName)
+			{
+				Game::setActiveScene(s.get());
+				s->enabled = true;
+				Player* player = (Player*)s->player;
+
+				player->setPosition(trigger->spawnPos);
+				player->health = healthTemp;
+				player->ignorePhysics = 2;
+				player->invincibilityFrames = 35;
+				return;
+			}
+		}
+
+		//if the scene isn't loaded, load it
 		Game::loadScene(trigger->levelName, [trigger, currentScene, healthTemp](Scene* newScene)
 		{
 			Game::setActiveScene(newScene);
-			newScene->player->setPosition(trigger->spawnPos);
-			((Player*)newScene->player)->health = healthTemp;
-			currentScene->destroy();
+			Player* player = (Player*)newScene->player;
+
+			player->setPosition(trigger->spawnPos);
+			player->health = healthTemp;
+
+			currentScene->enabled = false;
 		});
 	}
 }
