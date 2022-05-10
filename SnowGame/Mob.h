@@ -11,6 +11,7 @@ public:
 	void fixedUpdate() override;
 	void onCollisionEnter(RigidBody* other) override;
 	void loadEntityData(const ldtk::Entity& entity) override;
+	int dieCounter;
 	
 private:
 	float targetVelocity = 20;
@@ -18,5 +19,4 @@ private:
 	bool patrol = false;
 	sf::Vector2f* patrolPoints;
 	int currentPoint = 0;
-	int dieCounter;
 };

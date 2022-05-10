@@ -163,7 +163,7 @@ Scene::~Scene()
 		delete col;
 	}
 
-	delete music;
+	if (music != nullptr) music->stop();
 }
 
 void Scene::update(float dt)

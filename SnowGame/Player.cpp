@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "Hud.h"
 #include "LoadTrigger.h"
+#include "Mob.h"
 #include "Scene.h"
 #include "SFXManager.h"
 #include "Snowball.h"
@@ -221,6 +222,7 @@ void Player::onCollisionEnter(RigidBody* other)
 	if(other->name == "Mob")
 	{
 		if (invincibilityFrames > 0) return;
+		if (((Mob*)other)->dieCounter > 0) return;
 
 		hit.play();
 		const sf::Vector2f dir = VectorUtilities::normalizeVector(other->getPosition() - getPosition());

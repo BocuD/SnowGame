@@ -137,6 +137,7 @@ void Game::init()
         paused = false;
         currentMenu = nullptr;
         activeScene->disableHud = false;
+        if (activeScene->music != nullptr) activeScene->music->play();
     });
     pauseMenu->addOption("Return to main menu", []
     {
@@ -167,7 +168,7 @@ void Game::init()
     backgrounds[1].offset.y = -320;
     backgrounds[1].setScale(3);
 
-    currentBackground = &backgrounds[0];
+    currentBackground = &backgrounds[1];
 }
 
 void Game::update(float dt)
@@ -434,14 +435,18 @@ void Game::eventHandler(const sf::Event e, sf::Window* window)
                     paused = true;
                     currentMenu = pauseMenu;
                     activeScene->disableHud = true;
-                    activeScene->music->stop();
+
+                    if (activeScene->music != nullptr)
+                        activeScene->music->stop();
                 }
                 else
                 {
                     paused = false;
                     currentMenu = nullptr;
                     activeScene->disableHud = false;
-                    activeScene->music->play();
+
+                    if (activeScene->music != nullptr)
+                        activeScene->music->play();
                 }
 	        }
         }
