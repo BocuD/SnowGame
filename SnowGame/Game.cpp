@@ -26,6 +26,8 @@ Menu* levelTransition;
 
 Menu* currentMenu;
 
+int transitionTimer;
+
 sf::View* Game::sceneView;
 sf::View* Game::backgroundView;
 sf::View* Game::hudView;
@@ -103,6 +105,10 @@ void Game::init()
         currentMenu = optionsMenu;
     });
     mainMenu->addOption("Credits", [] {});
+    mainMenu->addOption("Exit", [this]
+    {
+        this->exitGame = true;
+    });
 
     currentMenu = mainMenu;
 
@@ -186,6 +192,22 @@ void Game::update(float dt)
 
 void Game::fixedUpdate() 
 {
+    if (transitionTimer > 0)
+    {
+        transitionTimer--;
+
+        if (transitionTimer == 0)
+        {
+            paused = false;
+            currentMenu = nullptr;
+            if(activeScene->music != nullptr)
+            {
+                activeScene->music->play();
+            }
+        }
+        return;
+    }
+
     if (paused) return;
 
     //run fixedUpdate in all scenes
@@ -198,6 +220,14 @@ void Game::fixedUpdate()
 
 void Game::draw(sf::RenderWindow* window)
 {
+    if(transitionTimer > 0)
+    {
+        window->clear();
+        window->setView(*menuView);
+        window->draw(*currentMenu);
+        return;
+    }
+
     if (activeScene != nullptr) 
     {
         //center view to player after running update()
@@ -269,6 +299,14 @@ void Game::startGame()
     inMenu = false;
 
     removeScene(menuScene);
+
+    transitionTimer = 120;
+    paused = true;
+
+    if (activeScene->music != nullptr)
+    {
+        activeScene->music->stop();
+    }
 }
 
 void Game::endGame()
@@ -386,19 +424,21 @@ void Game::eventHandler(const sf::Event e, sf::Window* window)
 
         if (e.key.code == sf::Keyboard::Key::Escape)
         {
-	        if(!Game::inMenu)
+	        if(!inMenu)
 	        {
                 if (currentMenu == nullptr)
                 {
                     paused = true;
                     currentMenu = pauseMenu;
                     activeScene->disableHud = true;
+                    activeScene->music->stop();
                 }
                 else
                 {
                     paused = false;
                     currentMenu = nullptr;
                     activeScene->disableHud = false;
+                    activeScene->music->play();
                 }
 	        }
         }

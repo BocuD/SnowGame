@@ -36,13 +36,19 @@ void Player::init()
 	hit.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/hit.ogg"));
 	teleport.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/teleport.ogg"));
 	coin.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/coin.ogg"));
-	gem.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/coin.ogg"));
+	gem.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/gem.ogg"));
 	snowball.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/snowball.ogg"));
+	land.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/land.ogg"));
+	dash.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/dash.ogg"));
 }
 
 void Player::update(float dt)
 {
-	if (grounded) jumpCount = 3;
+	if (grounded && !wasGrounded) 
+	{
+		land.play();
+		jumpCount = 3;
+	}
 
 	if (Game::hasFocus) {
 
@@ -110,12 +116,15 @@ void Player::update(float dt)
 				disableStateMachine = 1 * 16;
 				delayFrames = 1;
 				setTextureId(3);
+				dash.play();
 			}
 		}
 		else shiftWasPressed = false;
 	}
 
 	RigidBody::update(dt);
+
+	wasGrounded = grounded;
 }
 
 void Player::fixedUpdate()
@@ -203,6 +212,7 @@ void Player::removeHealth(int amount)
 	{
 		health = 0;
 		std::cout << "Player died" << std::endl;
+		Game::endGame();
 	}
 }
 

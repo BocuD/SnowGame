@@ -1,5 +1,6 @@
 ﻿#include "Mob.h"
 
+#include "SFXManager.h"
 #include "TextureManager.h"
 #include "VectorUtilities.h"
 
@@ -14,6 +15,7 @@ void Mob::init()
 	animate = true;
 
 	colliderSize = { 17, 13 };
+	die.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/slimehit.ogg"));
 }
 
 void Mob::update(float dt)
@@ -29,11 +31,29 @@ void Mob::update(float dt)
 	RigidBody::update(dt);
 }
 
+void Mob::fixedUpdate()
+{
+	if (dieCounter > 0)
+	{
+		int a = dieCounter * 50;
+		a -= 500;
+		sf::Uint8 alpha = a > 0 ? a : 0;
+		setColor({ 255, 0, 0, alpha });
+
+		dieCounter--;
+		if (dieCounter == 0)
+		{
+			destroy();
+		}
+	}
+}
+
 void Mob::onCollisionEnter(RigidBody* other)
 {
 	if(other->name == "Snowball")
 	{
-		destroy();
+		die.play();
+		dieCounter = 15;
 	}
 }
 

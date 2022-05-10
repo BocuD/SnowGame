@@ -23,6 +23,7 @@ public:
 	std::vector<Collider*> intersectingTriggers;
 
 	bool grounded = false;
+	bool wasGrounded = false;
 	sf::Vector2f colliderOffset;
 
 	virtual void onCollisionEnter(RigidBody* other) {};

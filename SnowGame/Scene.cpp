@@ -282,5 +282,7 @@ void Scene::removeEntity(GameObject* entity)
 
 void Scene::destroy()
 {
+	music->stop();
+	delete music;
 	destroyed = true;
 }

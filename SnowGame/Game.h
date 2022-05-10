@@ -20,6 +20,8 @@ public:
 	void draw(sf::RenderWindow* window);
 	void eventHandler(const sf::Event e, sf::Window* window);
 
+	bool exitGame = false;
+
 	static std::vector<std::unique_ptr<Scene>> scenes;
 
 	static void loadScene(std::string name, std::function<void(Scene* scene)> callback);

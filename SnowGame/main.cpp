@@ -77,6 +77,11 @@ int main(char* args)
         window.setTitle(windowTitle);
 
         window.display();
+
+        if(game.exitGame)
+        {
+            break;
+        }
     }
 
     return 0;

@@ -24,6 +24,8 @@ public:
 	sf::Sound coin;
 	sf::Sound gem;
 	sf::Sound snowball;
+	sf::Sound land;
+	sf::Sound dash;
 
 	int health;
 	const int maxHealth = 25;
