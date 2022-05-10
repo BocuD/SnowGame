@@ -171,6 +171,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SFXManager.cpp" />
     <ClCompile Include="Snowball.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="TileMap.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="LoadTrigger.h" />
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="SFXManager.h" />
     <ClInclude Include="Snowball.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="VectorUtilities.h" />

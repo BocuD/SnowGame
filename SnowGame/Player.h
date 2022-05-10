@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <SFML/Audio/Sound.hpp>
+
 #include "RigidBody.h"
 
 class Player : public RigidBody
@@ -15,6 +17,13 @@ public:
 
 	void onTriggerEnter(Collider* other) override;
 	void onTriggerExit(Collider* other) override;
+
+	sf::Sound jump;
+	sf::Sound hit;
+	sf::Sound teleport;
+	sf::Sound coin;
+	sf::Sound gem;
+	sf::Sound snowball;
 
 	int health;
 	const int maxHealth = 25;
