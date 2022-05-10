@@ -15,7 +15,15 @@ void ParallaxBackground::addLayer(const std::string texturePath)
 	sprite->setTexture(*texture);
 	sprite->setScale({ 5, 5 });
 	sf::IntRect rect = sprite->getTextureRect();
-	sprite->setTextureRect({{ 0, 0 }, { 2048, rect.height}});
+	sprite->setTextureRect({{ 0, 0 }, { 2048, rect.height * 3}});
+}
+
+void ParallaxBackground::setScale(float scale)
+{
+	for (size_t i = 0; i < sprites.size(); i++)
+	{
+		sprites[i].setScale({scale, scale} );
+	}
 }
 
 void ParallaxBackground::update(const sf::Vector2f camPos)

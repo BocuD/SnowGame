@@ -12,6 +12,7 @@ public:
 	std::vector<sf::Texture> textures;
 
 	void addLayer(std::string texturePath);
+	void setScale(float scale);
 	void update(sf::Vector2f camPos);
 
 	sf::Vector2f offset;

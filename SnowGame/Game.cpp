@@ -14,8 +14,8 @@
 
 ldtk::Project* project;
 
-ParallaxBackground backgroundSnow;
-ParallaxBackground backgroundCave;
+ParallaxBackground backgrounds[3];
+
 ParallaxBackground* currentBackground;
 Hud hud;
 
@@ -88,6 +88,7 @@ void Game::init()
 
     auto scene = std::make_unique<Scene>(project, "World_Level_0");
     scene->disableHud = true;
+    scene->backgroundIndex = 1;
     scenes.push_back(std::move(scene));
 	setActiveScene(scenes.back().get());
 
@@ -147,25 +148,26 @@ void Game::init()
     levelTransition->setTitle("Level 1", 45);
 
     //todo: turn these into an object in the scene
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png");
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/glacial_mountains.png");
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_3.png");
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_2.png");
-    backgroundSnow.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_1.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_bg.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/glacial_mountains.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_3.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_2.png");
+    backgrounds[0].addLayer("Assets/Backgrounds/Glacial-mountains/Layers/clouds_mg_1.png");
 
-    backgroundSnow.offset.x = -1000;
-    backgroundSnow.offset.y = -500;
+    backgrounds[0].offset.x = -1000;
+    backgrounds[0].offset.y = -500;
 
-    backgroundCave.addLayer("Assets/Backgrounds/pixel-art-cave/red_L1.png");
-    backgroundCave.addLayer("Assets/Backgrounds/pixel-art-cave/red_L2.png");
-    backgroundCave.addLayer("Assets/Backgrounds/pixel-art-cave/red_L3.png");
-    backgroundCave.addLayer("Assets/Backgrounds/pixel-art-cave/red_L4.png");
+    backgrounds[1].addLayer("Assets/Backgrounds/pixel-art-cave/blue_L1.png");
+    backgrounds[1].addLayer("Assets/Backgrounds/pixel-art-cave/blue_L2.png");
+    backgrounds[1].addLayer("Assets/Backgrounds/pixel-art-cave/blue_L3.png");
+    backgrounds[1].addLayer("Assets/Backgrounds/pixel-art-cave/blue_L4.png");
 
-    backgroundCave.offset.x = -1000;
-    backgroundCave.offset.y = -500;
+    backgrounds[1].offset.x = -1000;
+    backgrounds[1].offset.y = -320;
+    backgrounds[1].setScale(3);
 
-    currentBackground = &backgroundSnow;
+    currentBackground = &backgrounds[0];
 }
 
 void Game::update(float dt)
@@ -325,6 +327,7 @@ void Game::endGame()
     {
         setActiveScene(newScene);
         newScene->disableHud = true;
+        newScene->backgroundIndex = 1;
     });
 
     currentMenu = mainMenu;
@@ -367,7 +370,7 @@ Scene* Game::getActiveScene()
 void Game::setActiveScene(Scene* scene)
 {
     activeScene = scene;
-
+    currentBackground = &backgrounds[scene->backgroundIndex];
     resetViews();
 }
 

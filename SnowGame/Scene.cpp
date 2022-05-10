@@ -88,6 +88,10 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 					auto c = createEntity<Gem>(entity);
 					addRigidBody(c);
 				}
+				else if (entity.getName() == "Background")
+				{
+					backgroundIndex = entity.getField<int>("Index").value();
+				}
 				else if (entity.getName() == "Music")
 				{
 					ldtk::FilePath path = entity.getField<ldtk::FilePath>("MusicPath").value();
@@ -158,6 +162,8 @@ Scene::~Scene()
 	{
 		delete col;
 	}
+
+	delete music;
 }
 
 void Scene::update(float dt)
@@ -282,7 +288,5 @@ void Scene::removeEntity(GameObject* entity)
 
 void Scene::destroy()
 {
-	music->stop();
-	delete music;
 	destroyed = true;
 }

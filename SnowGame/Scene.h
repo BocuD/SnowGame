@@ -30,6 +30,7 @@ public:
 	sf::FloatRect sceneRect;
 	bool enabled = true;
 	bool destroyed = false;
+	int backgroundIndex = 0;
 
 	void update(float dt);
 	void fixedUpdate();
