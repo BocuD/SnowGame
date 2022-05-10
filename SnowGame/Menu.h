@@ -1,36 +1,32 @@
 ﻿#pragma once
 
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include "Fonts.h"
+#include "Scene.h"
 
-class Menu
+class Menu : public sf::Drawable
 {
 public:
 	Menu();
+	void setTitle(std::string title, int textSize);
+	void addOption(std::string title, std::function<void()> onSelection);
 	void handleInput(const sf::Event::KeyEvent& key);
-	void selectOption();
-	void draw(sf::RenderWindow* window);
+	void selectOption(int option);
 
 	int currentOption = 0;
+	int optionCount = 0;
+	float menuWidth = 0;
 
-	enum class MenuState
-	{
-		title,
-		options,
-		loadSave,
-		credits
-	};
-
-	MenuState menuState;
+	static void alignCenter(ShadedText* text, sf::Vector2f position);
 
 private:
-	ShadedText* titleText;
-	ShadedText* startGameText;
-	ShadedText* optionsText;
-	ShadedText* creditsText;
+	std::vector<ShadedText> text;
+	std::vector<std::function<void()>> onSelect;
 
 	ShadedText* cursorText;
+	ShadedText* titleText;
+
+	void draw(sf::RenderTarget& target, const sf::RenderStates& states) const override;
 };
