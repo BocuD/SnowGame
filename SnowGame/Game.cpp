@@ -16,7 +16,13 @@ ldtk::Project* project;
 
 ParallaxBackground background;
 Hud hud;
-Menu* menu;
+
+Menu* mainMenu;
+Menu* pauseMenu;
+Menu* optionsMenu;
+Menu* levelTransition;
+
+Menu* currentMenu;
 
 sf::View* Game::sceneView;
 sf::View* Game::backgroundView;
@@ -83,7 +89,54 @@ void Game::init()
 
     hud.init();
 
-    menu = new Menu();
+    //create main menu
+    mainMenu = new Menu();
+    mainMenu->setTitle("Snowball Jump", 60);
+    mainMenu->addOption("Start game", []
+    {
+        startGame();
+    });
+    mainMenu->addOption("Options", []
+    {
+        currentMenu = optionsMenu;
+    });
+    mainMenu->addOption("Credits", [] {});
+
+    currentMenu = mainMenu;
+
+    //create options menu
+    optionsMenu = new Menu();
+    optionsMenu->setTitle("Options", 45);
+    optionsMenu->addOption("Toggle fullscreen", []
+    {
+        setFullScreen(!fullScreen);
+    });
+    optionsMenu->addOption("Toggle vsync", [] 
+    {
+        setVSync(!vsync);
+    });
+    optionsMenu->addOption("Return to main menu", []
+    {
+        currentMenu = mainMenu;
+    });
+
+    //create pause menu
+    pauseMenu = new Menu();
+    pauseMenu->setTitle("Game Paused", 45);
+    pauseMenu->addOption("Continue", []
+    {
+        paused = false;
+        currentMenu = nullptr;
+        activeScene->disableHud = false;
+    });
+    pauseMenu->addOption("Return to main menu", []
+    {
+        endGame();
+    });
+
+    //create level transition menu
+    levelTransition = new Menu();
+    levelTransition->setTitle("Level 1", 45);
 
     //todo: turn these into an object in the scene
     background.addLayer("Assets/Backgrounds/Glacial-mountains/Layers/sky.png");
@@ -99,68 +152,92 @@ void Game::init()
 
 void Game::update(float dt)
 {
+    if (paused) return;
+
     //update the scene
 	for (auto& scene : scenes)
 	{
-        scene->update(dt);
+        if (scene->enabled)
+            scene->update(dt);
 	}
+
+    //remove destroyed scenes
+    for (size_t i = 0; i < scenes.size(); i++)
+    {
+        Scene* scene = scenes[i].get();
+        if (scene->destroyed)
+        {
+            removeScene(scene);
+        }
+    }
 }
 
 void Game::fixedUpdate() 
 {
+    if (paused) return;
+
     //run fixedUpdate in all scenes
     for (auto& scene : scenes)
     {
-        scene->fixedUpdate();
+        if (scene->enabled)
+            scene->fixedUpdate();
     }
 }
 
 void Game::draw(sf::RenderWindow* window)
 {
-    //center view to player after running update()
-    if (activeScene->player != nullptr)
-        sceneView->setCenter(activeScene->player->getPosition());
+    if (activeScene != nullptr) 
+    {
+        //center view to player after running update()
+        if (activeScene->player != nullptr)
+            sceneView->setCenter(activeScene->player->getPosition());
 
-    sf::FloatRect sceneRect = activeScene->sceneRect;
+        sf::FloatRect sceneRect = activeScene->sceneRect;
 
-    sf::Vector2f center = sceneView->getCenter();
-    sf::Vector2f size = sceneView->getSize();
+        sf::Vector2f center = sceneView->getCenter();
+        sf::Vector2f size = sceneView->getSize();
 
-    sf::FloatRect viewRect = { { center.x - size.x / 2, center.y - size.y / 2}, {size.x, size.y }};
+        sf::FloatRect viewRect = { { center.x - size.x / 2, center.y - size.y / 2}, {size.x, size.y } };
 
-    if (viewRect.left < sceneRect.left) viewRect.left = sceneRect.left;
-    if (viewRect.left + viewRect.width > sceneRect.left + sceneRect.width) viewRect.left = sceneRect.left + sceneRect.width - viewRect.width;
+        if (viewRect.left < sceneRect.left) viewRect.left = sceneRect.left;
+        if (viewRect.left + viewRect.width > sceneRect.left + sceneRect.width) viewRect.left = sceneRect.left + sceneRect.width - viewRect.width;
 
-    if (viewRect.top < sceneRect.top) viewRect.top = sceneRect.top;
-    if (viewRect.top + viewRect.height > sceneRect.top + sceneRect.height) viewRect.top = sceneRect.top + sceneRect.height - viewRect.height;
+        if (viewRect.top < sceneRect.top) viewRect.top = sceneRect.top;
+        if (viewRect.top + viewRect.height > sceneRect.top + sceneRect.height) viewRect.top = sceneRect.top + sceneRect.height - viewRect.height;
 
-    sceneView->reset(viewRect);
+        sceneView->reset(viewRect);
 
-    background.update(-sceneView->getCenter() / 10.f);
+        background.update(-sceneView->getCenter() / 10.f);
 
-    window->setView(*backgroundView);
-    window->draw(background);
-    window->setView(*sceneView);
+        window->setView(*backgroundView);
+        window->draw(background);
+        window->setView(*sceneView);
+    }
 
     //draw all scenes
     for (auto& scene : scenes)
     {
-        scene->draw(window);
+        if (scene->enabled)
+            scene->draw(window);
     }
 
-    if (!activeScene->disableHud)
+    if (activeScene != nullptr) 
     {
-        //draw hud
-        window->setView(*hudView);
-        hud.health = ((Player*)activeScene->player)->health;
-        hud.update();
-        window->draw(hud);
+        if (!activeScene->disableHud)
+        {
+            //draw hud
+            window->setView(*hudView);
+            hud.health = ((Player*)activeScene->player)->health;
+            hud.update();
+            window->draw(hud);
+        }
     }
-    else
+
+    //draw menu
+    if (currentMenu != nullptr)
     {
-        //draw menu
         window->setView(*menuView);
-        menu->draw(window);
+        window->draw(*currentMenu);
     }
 }
 
@@ -171,12 +248,38 @@ void Game::startGame()
 
     Scene* menuScene = getActiveScene();
 
-    loadScene("World_Level_1", [](Scene* newScene)
+    loadScene("World_Level_0", [](Scene* newScene)
     {
         setActiveScene(newScene);
     });
 
+    currentMenu = levelTransition;
+    inMenu = false;
+
     removeScene(menuScene);
+}
+
+void Game::endGame()
+{
+	for (auto& scene : scenes)
+	{
+        scene->destroy();
+	}
+
+    project = new ldtk::Project;
+    project->loadFromFile("Assets/menu.ldtk");
+
+    Scene* gameScene = getActiveScene();
+
+    loadScene("World_Level_0", [](Scene* newScene)
+    {
+        setActiveScene(newScene);
+        newScene->disableHud = true;
+    });
+
+    currentMenu = mainMenu;
+    inMenu = true;
+    paused = false;
 }
 
 void Game::loadScene(std::string name, std::function<void(Scene* scene)> callback)
@@ -194,6 +297,8 @@ void Game::loadSceneAsync(std::string levelName, std::function<void(Scene* scene
 
 void Game::removeScene(Scene* scene)
 {
+    if (activeScene == scene) activeScene = nullptr;
+
     for (size_t i = 0; i < scenes.size(); i++)
     {
 	    if(scenes[i].get() == scene)
@@ -220,6 +325,21 @@ ldtk::Project* Game::getProject()
 {
     return project;
 }
+
+void Game::setVSync(bool value)
+{
+    vsync = value;
+    graphicsChanges = true;
+}
+
+void Game::setFullScreen(bool value)
+{
+    fullScreen = value;
+    graphicsChanges = true;
+}
+
+bool Game::inMenu = true;
+bool Game::paused = false;
 
 bool Game::hasFocus;
 
@@ -251,7 +371,32 @@ void Game::eventHandler(const sf::Event e, sf::Window* window)
                 element->drawColliders = !element->drawColliders;
 	        }
         }
-        menu->handleInput(e.key);
+
+        if (e.key.code == sf::Keyboard::Key::Escape)
+        {
+	        if(!Game::inMenu)
+	        {
+                if (currentMenu == nullptr)
+                {
+                    paused = true;
+                    currentMenu = pauseMenu;
+                    activeScene->disableHud = true;
+                }
+                else
+                {
+                    paused = false;
+                    currentMenu = nullptr;
+                    activeScene->disableHud = false;
+                }
+	        }
+        }
+        
+        if (currentMenu != nullptr)
+            currentMenu->handleInput(e.key);
         break;
     }
 }
+
+bool Game::vsync = true;
+bool Game::fullScreen = false;
+bool Game::graphicsChanges = false;

@@ -8,7 +8,7 @@ const float dt = 1/60.f;
 
 int main(char* args)
 {
-    sf::RenderWindow window(sf::VideoMode(1280, 800), "Snow Game");
+    sf::RenderWindow window(sf::VideoMode(1280, 800), "Snowball Jump");
     window.setVerticalSyncEnabled(true);
 
     Game game;
@@ -53,6 +53,20 @@ int main(char* args)
         }
 
         window.clear();
+
+        if(Game::graphicsChanges)
+        {
+            if (Game::fullScreen) 
+            {
+                window.create(sf::VideoMode::getFullscreenModes()[0], "Snowball Jump", sf::Style::Fullscreen);
+            }
+        	else
+            {
+                window.create(sf::VideoMode(1280, 720), "Snowball Jump");
+            }
+            window.setVerticalSyncEnabled(Game::vsync);
+            Game::graphicsChanges = false;
+        }
 
         game.update(updateTime);
         game.draw(&window);
