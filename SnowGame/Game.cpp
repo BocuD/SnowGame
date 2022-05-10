@@ -82,7 +82,7 @@ void Game::init()
 
     Fonts::loadFonts();
 
-    auto scene = std::make_unique<Scene>(project, "World_Level_9");
+    auto scene = std::make_unique<Scene>(project, "World_Level_0");
     scene->disableHud = true;
     scenes.push_back(std::move(scene));
 	setActiveScene(scenes.back().get());
