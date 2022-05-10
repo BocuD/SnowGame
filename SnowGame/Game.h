@@ -5,6 +5,7 @@
 
 #include "LDtkLoader/Project.hpp"
 #include "Scene.h"
+#include "SFXManager.h"
 #include "TextureManager.h"
 
 class Game
@@ -42,6 +43,7 @@ public:
 
 private:
 	TextureManager textureManager;
+	SFXManager sfxManager;
 
 	static bool inMenu;
 

@@ -1,6 +1,5 @@
 ﻿#include "Player.h"
 
-#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 #include "Coin.h"
@@ -8,6 +7,7 @@
 #include "Hud.h"
 #include "LoadTrigger.h"
 #include "Scene.h"
+#include "SFXManager.h"
 #include "Snowball.h"
 #include "TextureManager.h"
 #include "VectorUtilities.h"
@@ -31,6 +31,13 @@ void Player::init()
 	ignorePhysics = 2;
 
 	invincibilityFrames = 35;
+
+	jump.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/jump.ogg"));
+	hit.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/hit.ogg"));
+	teleport.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/teleport.ogg"));
+	coin.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/coin.ogg"));
+	gem.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/coin.ogg"));
+	snowball.setBuffer(*SFXManager::getSoundBuffer("Assets/SFX/snowball.ogg"));
 }
 
 void Player::update(float dt)
@@ -56,6 +63,7 @@ void Player::update(float dt)
 				delayFrames = 4;
 				setTextureId(2);
 				disableStateMachine = 8 * 4;
+				jump.play();
 			}
 		}
 		else upWasPressed = false;
@@ -68,6 +76,7 @@ void Player::update(float dt)
 		{
 			if (spaceWasPressed)
 			{
+				snowball.play();
 				auto snowball = new Snowball();
 				snowball->name = "Snowball";
 				snowball->setPosition(getPosition());
@@ -203,6 +212,7 @@ void Player::onCollisionEnter(RigidBody* other)
 	{
 		if (invincibilityFrames > 0) return;
 
+		hit.play();
 		const sf::Vector2f dir = VectorUtilities::normalizeVector(other->getPosition() - getPosition());
 		velocity += -dir * 500.0f;
 		invincibilityFrames = 50;
@@ -213,11 +223,13 @@ void Player::onCollisionEnter(RigidBody* other)
 	{
 		((Coin*)other)->pickup();
 		Hud::incCoinCount();
+		coin.play();
 	}
 	else if (other->name == "Gem")
 	{
 		((Gem*)other)->pickup();
 		Hud::setGemCollected(((Gem*)other)->index);
+		gem.play();
 	}
 }
 
@@ -231,23 +243,40 @@ void Player::onTriggerEnter(Collider* other)
 	{
 		if (invincibilityFrames > 0) return;
 
+		teleport.play();
 		auto trigger = (LoadTrigger*)other;
 		Scene* currentScene = scene;
 		int healthTemp = health;
 
 		//first try to loop through loaded scenes, and if the target scene is loaded, just set it as active
-		for (auto& s : Game::scenes)
+		for (auto& newScene : Game::scenes)
 		{
-			if (s->name == trigger->levelName)
+			if (newScene->name == trigger->levelName)
 			{
-				Game::setActiveScene(s.get());
-				s->enabled = true;
-				Player* player = (Player*)s->player;
+				Game::setActiveScene(newScene.get());
+				newScene->enabled = true;
+				Player* player = (Player*)newScene->player;
 
 				player->setPosition(trigger->spawnPos);
 				player->health = healthTemp;
 				player->ignorePhysics = 2;
 				player->invincibilityFrames = 35;
+
+				if (currentScene->musicName == newScene->musicName) 
+				{
+					if (currentScene->music != newScene->music)
+					{
+						delete newScene->music;
+						newScene->music = currentScene->music;
+					}
+				}
+				else
+				{
+					currentScene->music->stop();
+					newScene->music->setPlayingOffset(sf::seconds(0));
+					newScene->music->play();
+				}
+				currentScene->enabled = false;
 				return;
 			}
 		}
@@ -261,6 +290,17 @@ void Player::onTriggerEnter(Collider* other)
 			player->setPosition(trigger->spawnPos);
 			player->health = healthTemp;
 
+			if (currentScene->musicName == newScene->musicName)
+			{
+				delete newScene->music;
+				newScene->music = currentScene->music;
+			}
+			else
+			{
+				currentScene->music->stop();
+				newScene->music->setPlayingOffset(sf::seconds(0));
+				newScene->music->play();
+			}
 			currentScene->enabled = false;
 		});
 	}

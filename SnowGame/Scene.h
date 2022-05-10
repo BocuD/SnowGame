@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Audio.hpp>
 
 #include "Collider.h"
 #include "GameObject.h"
@@ -23,6 +24,8 @@ public:
 	std::vector<Collider*> colliders;
 
 	GameObject* player;
+	sf::Music* music;
+	std::string musicName;
 
 	sf::FloatRect sceneRect;
 	bool enabled = true;

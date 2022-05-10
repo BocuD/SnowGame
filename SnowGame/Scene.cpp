@@ -88,6 +88,22 @@ Scene::Scene(ldtk::Project* project, const std::string& levelName)
 					auto c = createEntity<Gem>(entity);
 					addRigidBody(c);
 				}
+				else if (entity.getName() == "Music")
+				{
+					ldtk::FilePath path = entity.getField<ldtk::FilePath>("MusicPath").value();
+					musicName = "Assets/" + path.directory() + path.filename();
+
+					music = new sf::Music();
+					if(music->openFromFile(musicName))
+					{
+						music->play();
+						music->setLoop(true);
+					}
+					else
+					{
+						std::cout << "Failed to load music clip " << musicName << std::endl;
+					}
+				}
 			}
 		}
 
