@@ -177,12 +177,6 @@ void Scene::update(float dt)
 			removeEntity(entity);
 		}
 	}
-
-	if(destroyed)
-	{
-		destroy();
-		Game::removeScene(this);
-	}
 }
 
 void Scene::fixedUpdate()

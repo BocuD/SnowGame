@@ -25,6 +25,7 @@ public:
 	GameObject* player;
 
 	sf::FloatRect sceneRect;
+	bool enabled = true;
 	bool destroyed = false;
 
 	void update(float dt);
